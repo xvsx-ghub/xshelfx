@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.androidx.room)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
@@ -32,6 +34,11 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.coil.network.okhttp)
             implementation(libs.androidx.core.ktx)
+            implementation(libs.bundles.httpAndroid)
+            implementation(libs.androidx.work.runtime.ktx)
+            implementation(libs.androidx.lifecycle.runtime.ktx)
+            implementation(libs.androidx.lifecycle.service)
+            implementation(libs.androidx.lifecycle.process)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -45,6 +52,15 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.coil.compose)
+            implementation(libs.bundles.httpComon)
+            implementation(libs.bundles.localDataStore)
+            implementation(libs.bundles.database)
+            implementation(libs.bundles.stomp)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.bundles.dependencyInjection)
+        }
+        iosMain.dependencies {
+            implementation(libs.bundles.httpIos)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -81,5 +97,12 @@ android {
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
