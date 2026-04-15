@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -58,6 +57,7 @@ kotlin {
             implementation(libs.bundles.stomp)
             implementation(libs.kotlinx.datetime)
             implementation(libs.bundles.dependencyInjection)
+            implementation(libs.bundles.projectNavigation)
         }
         iosMain.dependencies {
             implementation(libs.bundles.httpIos)
@@ -105,4 +105,3 @@ dependencies {
 room {
     schemaDirectory("$projectDir/schemas")
 }
-

@@ -2,6 +2,7 @@ package com.xvsx.shelf.data.local
 
 import com.xvsx.shelf.data.local.dataBase.AppDatabase
 import com.xvsx.shelf.data.local.dataBase.entity.AuthorizationEntity
+import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
 import com.xvsx.shelf.data.local.dataBase.entity.CustomerEntity
 import com.xvsx.shelf.data.local.dataBase.entity.CustomerTaskEntity
 import com.xvsx.shelf.data.local.dataBase.entity.DestinationEntity
@@ -32,10 +33,21 @@ class RepositoryLocal(
         const val TAG = "RepositoryLocal"
     }
 
+    private var baseUrl: String? = null
     private var wisUrl: String? = null
     private var wisName: String? = null
     private var sessionKey: String? = null
     private var rosterId: String? = null
+
+    fun setBaseUrl(value: String?) {
+        baseUrl = value
+        settingsManager.baseUrl = value ?: ""
+    }
+
+    fun getBaseUrl(): String {
+        if(baseUrl.isNullOrEmpty()) baseUrl = settingsManager.baseUrl
+        return baseUrl!!
+    }
 
     fun setWisUrl(value: String?) {
         wisUrl = value
@@ -411,5 +423,25 @@ class RepositoryLocal(
         appDatabase.getWasteTypeDao().clear()
         appDatabase.getDestinationDao().clear()
         appDatabase.getJobDao().clear()
+    }
+
+    suspend fun clearChatMessageEntityList(){
+        return appDatabase.getChatMessageDao().clear()
+    }
+
+    suspend fun insertChatMessageEntity(chatMessageEntity: ChatMessageEntity): Long {
+        return appDatabase.getChatMessageDao().insert(chatMessageEntity)
+    }
+
+    suspend fun insertChatMessageEntityList(chatMessageEntityList: List<ChatMessageEntity>) {
+        return appDatabase.getChatMessageDao().insertAll(chatMessageEntityList)
+    }
+
+    suspend fun getChatMessageEntityList(): List<ChatMessageEntity>? {
+        return appDatabase.getChatMessageDao().getList()
+    }
+
+    fun getChatMessageEntityListAsFlow(): Flow<List<ChatMessageEntity>?> {
+        return appDatabase.getChatMessageDao().getListAsFlow()
     }
 }

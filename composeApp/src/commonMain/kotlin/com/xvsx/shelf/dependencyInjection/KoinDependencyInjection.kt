@@ -8,10 +8,20 @@ import com.xvsx.shelf.data.remote.RepositoryRemote
 import com.xvsx.shelf.data.remote.http.Http
 import com.xvsx.shelf.data.remote.stomp.StompManager
 import com.xvsx.shelf.data.useCase.LoginUseCase
+import com.xvsx.shelf.userInterface.screen.ChatScreen
+import com.xvsx.shelf.userInterface.screen.SplashScreen
+import com.xvsx.shelf.userInterface.viewModel.ChatViewModel
+import com.xvsx.shelf.userInterface.viewModel.SplashViewModel
 import com.xvsx.shelf.util.System
 import org.koin.dsl.module
 
 val baseApplicationModule = module {
+    single { SplashScreen() }
+    single { ChatScreen() }
+
+    single { SplashViewModel(get (), get()) }
+    single { ChatViewModel(get (), get()) }
+
     single<Settings> { Settings() }
     single { SettingsManager(get()) }
     single { getRoomDatabase() }
@@ -23,5 +33,5 @@ val baseApplicationModule = module {
     single { LoginUseCase(get(), get()) }
 
     single { RepositoryLocal(get(), get(), get()) }
-    single { RepositoryRemote() }
+    single { RepositoryRemote(get()) }
 }

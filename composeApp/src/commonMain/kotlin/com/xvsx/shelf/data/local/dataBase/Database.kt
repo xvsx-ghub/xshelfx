@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.xvsx.shelf.data.local.dataBase.dao.AuthorizationDao
+import com.xvsx.shelf.data.local.dataBase.dao.ChatMessageDao
 import com.xvsx.shelf.data.local.dataBase.dao.CustomerDao
 import com.xvsx.shelf.data.local.dataBase.dao.CustomerTaskDao
 import com.xvsx.shelf.data.local.dataBase.dao.DestinationDao
@@ -16,6 +17,7 @@ import com.xvsx.shelf.data.local.dataBase.dao.TaskDao
 import com.xvsx.shelf.data.local.dataBase.dao.TruckReportDao
 import com.xvsx.shelf.data.local.dataBase.dao.WasteTypeDao
 import com.xvsx.shelf.data.local.dataBase.entity.AuthorizationEntity
+import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
 import com.xvsx.shelf.data.local.dataBase.entity.CustomerEntity
 import com.xvsx.shelf.data.local.dataBase.entity.CustomerTaskEntity
 import com.xvsx.shelf.data.local.dataBase.entity.DestinationEntity
@@ -39,9 +41,10 @@ import com.xvsx.shelf.data.local.dataBase.entity.WasteTypeEntity
         TruckReportEntity::class,
         WasteTypeEntity::class,
         DestinationEntity::class,
-        JobEntity::class
+        JobEntity::class,
+        ChatMessageEntity::class
     ],
-    version = 35
+    version = 37
 )
 
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -58,4 +61,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getWasteTypeDao(): WasteTypeDao
     abstract fun getDestinationDao(): DestinationDao
     abstract fun getJobDao(): JobDao
+    abstract fun getChatMessageDao(): ChatMessageDao
 }

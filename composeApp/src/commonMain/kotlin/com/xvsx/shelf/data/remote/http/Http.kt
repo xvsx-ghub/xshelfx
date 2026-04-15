@@ -4,6 +4,7 @@ import com.xvsx.shelf.data.local.RepositoryLocal
 import com.xvsx.shelf.data.local.dataBase.entity.TruckReportEntity
 import com.xvsx.shelf.data.remote.http.response.AppConfigResponse
 import com.xvsx.shelf.data.remote.http.response.AuthorizationResponse
+import com.xvsx.shelf.data.remote.http.response.ChatMessageResponse
 import com.xvsx.shelf.data.remote.http.response.CustomerListResponse
 import com.xvsx.shelf.data.remote.http.response.CustomerTaskListResponse
 import com.xvsx.shelf.data.remote.http.response.DestinationListResponse
@@ -109,6 +110,38 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             }
         )
     }
+
+
+    suspend fun getChatMessageList(
+        onEvent: suspend (status: HttpStatus, data: ChatMessageResponse?, error: Exception?) -> Unit
+    ) {
+        val requestName = "api/messages"
+        val request = Request(
+            url = repositoryLocal.getBaseUrl() + "/$requestName",
+            paramHashMap = hashMapOf(),
+            typeValue = RequestType.Online.name,
+            methodValue = RequestMethod.Get.name
+        )
+        get<ChatMessageResponse>(
+            request = request,
+            onEvent = { status, data, error ->
+                onEvent(status,data,error)
+            }
+        )
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     suspend fun setPhoto(
         customerId: String,

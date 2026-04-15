@@ -7,12 +7,17 @@ class SettingsManager(
     private val settings: Settings
 ) {
     companion object {
+        private const val BASE_URL_KEY = "https://compellingly-presynsacral-albertine.ngrok-free.dev/"
         private const val WIS_URL_KEY = "wisUrl"
         private const val WIS_NAME_KEY = "wisName"
         private const val SESSION_KEY_KEY = "sessionKey"
         private const val ROSTER_ID_KEY = "rosterId"
         private const val TRANSACTION_ID = "transactionId"
     }
+
+    var baseUrl: String
+        get() = settings.getString(BASE_URL_KEY, "")
+        set(value) = settings.set(BASE_URL_KEY, value)
 
     var wisUrl: String
         get() = settings.getString(WIS_URL_KEY, "")
