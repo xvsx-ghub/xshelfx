@@ -9,9 +9,11 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
+import io.ktor.http.contentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -220,7 +222,7 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
         }
     }
 
-    protected suspend inline fun <reified T> post(
+    protected suspend inline fun <reified T> postFormData(
         request: Request,
         crossinline onEvent: suspend (status: HttpStatus, data: T?, error: Exception?) -> Unit
     ) {
@@ -241,6 +243,61 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
                     url = request.url,
                     formData = request.mapToFormData(get(request.imageFileHashMap))
                 )
+            }
+            val bodyText = httpResponse.bodyAsText()
+            Logger.d(TAG, "Response from ${request.url} : $bodyText")
+            val json = Json { ignoreUnknownKeys = true }
+            response = json.decodeFromString<T>(bodyText)
+        } catch (e: Exception) {
+            Logger.d(TAG, "Exception from ${request.url} : ${e.message}")
+            when (RequestType.valueOf(request.typeValue)) {
+                RequestType.Online -> {
+                    exception = e
+                }
+
+                RequestType.Offline -> {
+                    exception = null
+                    repositoryLocal.insert(
+                        request.mapToRequestEntity()
+                    )
+                    Logger.d(TAG, "Request saved to DB. Url: ${request.url}")
+                }
+
+                RequestType.Mixed -> {
+                    exception = e
+                    repositoryLocal.insert(
+                        request.mapToRequestEntity()
+                    )
+                    Logger.d(TAG, "Request saved to DB. Url: ${request.url}")
+                }
+            }
+        } finally {
+            isLoading = false
+            onEvent(HttpStatus.Completed, response, exception)
+        }
+    }
+
+    protected suspend inline fun <reified T> postJson(
+        request: Request,
+        crossinline onEvent: suspend (status: HttpStatus, data: T?, error: Exception?) -> Unit
+    ) {
+        var response: T? = null
+        var exception: Exception? = null
+
+        if (isLoading) {
+            Logger.d(TAG, "Abort request to ${request.url}")
+            onEvent(HttpStatus.Busy, null, null)
+            return
+        }
+
+        isLoading = true
+        onEvent(HttpStatus.Started, null, null)
+        try {
+            val httpResponse = withContext(Dispatchers.IO) {
+                client.post(request.url) {
+                    contentType(ContentType.Application.Json)
+                    setBody(request.paramHashMap)
+                }
             }
             val bodyText = httpResponse.bodyAsText()
             Logger.d(TAG, "Response from ${request.url} : $bodyText")
@@ -318,7 +375,7 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
 
                 RequestMethod.Post -> {
                     Logger.d(TAG, "Offline data synchronization. Psst. Url: ${requestEntity.url}")
-                    post<Wis<UnknownData>>(
+                    postFormData<Wis<UnknownData>>(
                         request = request,
                         onEvent = { status, data, error ->
                             when (status) {
@@ -398,7 +455,7 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
             }
 
             RequestMethod.Post -> {
-                post<Wis<T>>(
+                postFormData<Wis<T>>(
                     request = request,
                     onEvent = { status, data, error ->
                         if (data == null) {

@@ -52,7 +52,7 @@ class ChatViewModel(
         serveChatMessagesRemote()
     }
 
-    fun serveChatMessagesLocal(){
+    fun serveChatMessagesLocal() {
         viewModelScope.launch {
             repositoryLocal.getChatMessageEntityList()?.let {
                 state = state.copy(chatMessageEntityList = it)
@@ -66,9 +66,9 @@ class ChatViewModel(
         }
     }
 
-    fun serveChatMessagesRemote(){
+    fun serveChatMessagesRemote() {
         viewModelScope.launch {
-            while(true) {
+            while (true) {
                 repositoryRemote.getChatMessageList { status, data, error ->
                     error?.let {
                         return@getChatMessageList
@@ -84,20 +84,22 @@ class ChatViewModel(
                                 }
                             }
                         }
+
                         else -> {}
                     }
                 }
 
-                delay(3000)
+                delay(10000)
             }
         }
     }
 
-    suspend fun getChatMessages() {
+    fun getChatMessages() {
         viewModelScope.launch {
             repositoryRemote.getChatMessageList { status, data, error ->
                 error?.let {
                     setUiNotification(error.message)
+                    pushProgressBar(false)
                     return@getChatMessageList
                 }
                 when (status) {
@@ -113,6 +115,40 @@ class ChatViewModel(
                                     it
                                 )
                             }
+                        }
+                        pushProgressBar(false)
+                    }
+
+                    HttpClientCore.HttpStatus.Busy -> {
+                        setUiNotification("Can't obtain messages. Ty again later")
+                        pushProgressBar(false)
+                    }
+                }
+            }
+        }
+    }
+
+    fun setChatMessages(
+        nickname: String,
+        text: String
+    ) {
+        viewModelScope.launch {
+            repositoryRemote.setChatMessage(
+                nickname, text
+            ) { status, data, error ->
+                error?.let {
+                    setUiNotification(error.message)
+                    pushProgressBar(false)
+                    return@setChatMessage
+                }
+                when (status) {
+                    HttpClientCore.HttpStatus.Started -> {
+                        pushProgressBar(true)
+                    }
+
+                    HttpClientCore.HttpStatus.Completed -> {
+                        data?.let { chatMessageResponse ->
+                            chatMessageResponse.text
                         }
                         pushProgressBar(false)
                     }

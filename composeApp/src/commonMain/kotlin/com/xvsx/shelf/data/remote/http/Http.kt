@@ -130,6 +130,30 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
         )
     }
 
+    suspend fun setChatMessage(
+        nickname: String,
+        text: String,
+        onEvent: suspend (status: HttpStatus, data: ChatMessageResponse.ChatMessage?, error: Exception?) -> Unit
+    ) {
+        val requestName = "api/messages"
+
+        val request = Request(
+            url = repositoryLocal.getBaseUrl() + "/$requestName",
+            paramHashMap = hashMapOf(
+                "nickname" to nickname,
+                "text" to text
+            ),
+            typeValue = RequestType.Online.name,
+            methodValue = RequestMethod.Post.name
+        )
+        postJson<ChatMessageResponse.ChatMessage?>(
+            request = request,
+            onEvent = { status, data, error ->
+                onEvent(status,data,error)
+            }
+        )
+    }
+
 
 
 
@@ -171,7 +195,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             typeValue = RequestType.Mixed.name,
             methodValue = RequestMethod.Post.name
         )
-        post<Wis<UnknownData?>>(
+        postFormData<Wis<UnknownData?>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
@@ -212,7 +236,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             typeValue = RequestType.Mixed.name,
             methodValue = RequestMethod.Post.name
         )
-        post<Wis<UnknownData?>>(
+        postFormData<Wis<UnknownData?>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
@@ -333,7 +357,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             typeValue = RequestType.Mixed.name,
             methodValue = RequestMethod.Post.name
         )
-        post<Wis<UnknownData>>(
+        postFormData<Wis<UnknownData>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
@@ -455,7 +479,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             typeValue = RequestType.Mixed.name,
             methodValue = RequestMethod.Post.name
         )
-        post<Wis<WeighingResponse>>(
+        postFormData<Wis<WeighingResponse>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
@@ -491,7 +515,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             typeValue = RequestType.Mixed.name,
             methodValue = RequestMethod.Post.name
         )
-        post<Wis<WeighingResponse>>(
+        postFormData<Wis<WeighingResponse>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
@@ -535,7 +559,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             typeValue = RequestType.Mixed.name,
             methodValue = RequestMethod.Post.name
         )
-        post<Wis<WeighingResponse>>(
+        postFormData<Wis<WeighingResponse>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
@@ -563,7 +587,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             typeValue = RequestType.Mixed.name,
             methodValue = RequestMethod.Post.name
         )
-        post<Wis<WeightResponse>>(
+        postFormData<Wis<WeightResponse>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
@@ -593,7 +617,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             typeValue = RequestType.Mixed.name,
             methodValue = RequestMethod.Post.name
         )
-        post<Wis<PendingWeighingListResponse>>(
+        postFormData<Wis<PendingWeighingListResponse>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
@@ -619,7 +643,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             typeValue = RequestType.Mixed.name,
             methodValue = RequestMethod.Post.name
         )
-        post<Wis<RouteResponse>>(
+        postFormData<Wis<RouteResponse>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
