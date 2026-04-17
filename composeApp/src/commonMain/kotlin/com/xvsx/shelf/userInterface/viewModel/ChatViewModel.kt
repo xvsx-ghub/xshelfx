@@ -201,7 +201,6 @@ class ChatViewModel(
     }
 
     fun updateUser(nickname: String){
-        if(nickname.isEmpty()) return
         viewModelScope.launch {
             repositoryLocal.clearUserEntityList()
             repositoryLocal.insertUserEntity(UserEntity(nickname = nickname))
