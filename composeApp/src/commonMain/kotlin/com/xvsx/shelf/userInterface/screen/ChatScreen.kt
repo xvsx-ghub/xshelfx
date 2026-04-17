@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -93,17 +94,26 @@ class ChatScreen() : Screen {
                         modifier = Modifier
                             .weight(1f)
                             .onFocusChanged { focusState ->
-                            if (isFocused && !focusState.isFocused) {
-                                chatViewModel.updateUser(draft)
-                            }
-                            isFocused = focusState.isFocused
-                        },
+                                if (isFocused && !focusState.isFocused) {
+                                    chatViewModel.updateUser(draft)
+                                }
+                                isFocused = focusState.isFocused
+                            },
                         value = draft,
                         onValueChange = {
                             draft = it
                         },
-                        placeholder = { Text("Nickname") },
-                        singleLine = true
+                        placeholder = {
+                            Text(
+                                "Nickname",
+                                color = Color.Gray
+                            )
+                        },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black
+                        )
                     )
                 }
             },
@@ -111,8 +121,7 @@ class ChatScreen() : Screen {
                 Column(
                     modifier = Modifier
                         .padding(innerPadding)
-                        .fillMaxSize()
-                        .imePadding(),
+                        .fillMaxSize(),
                 ) {
                     val listState = rememberLazyListState()
 
@@ -126,16 +135,16 @@ class ChatScreen() : Screen {
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             items(nnChatMessageEntityList, key = { it.id }) { message ->
-                                if(chatViewModel.state.userEntity?.nickname == message.nickname){
+                                if (chatViewModel.state.userEntity?.nickname == message.nickname) {
                                     OutcomingChatMessage(message)
-                                }else{
+                                } else {
                                     IncomingChatMessage(message)
                                 }
                             }
                         }
 
                         LaunchedEffect(nnChatMessageEntityList.size) {
-                            if(nnChatMessageEntityList.isNotEmpty()) {
+                            if (nnChatMessageEntityList.isNotEmpty()) {
                                 listState.animateScrollToItem(nnChatMessageEntityList.size - 1)
                             }
                         }
@@ -156,13 +165,24 @@ class ChatScreen() : Screen {
                         modifier = Modifier.weight(1f),
                         value = draft,
                         onValueChange = { draft = it },
-                        placeholder = { Text("Message") },
+                        placeholder = {
+                            Text(
+                                "Message",
+                                color = Color.Gray
+                            )
+                        },
                         singleLine = false,
-                        maxLines = 4,
+                        maxLines = 5,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black
+                        )
                     )
                     TextButton(
                         onClick = {
-                            chatViewModel.setChatMessages(draft)
+                            chatViewModel.setChatMessages(draft) {
+                                draft = ""
+                            }
                         },
                     ) {
                         Text("Send")

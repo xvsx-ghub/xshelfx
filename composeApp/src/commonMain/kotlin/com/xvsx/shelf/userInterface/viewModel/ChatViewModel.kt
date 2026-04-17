@@ -166,7 +166,8 @@ class ChatViewModel(
     }
 
     fun setChatMessages(
-        text: String
+        text: String,
+        onSuccess: (chatMessageEntity: ChatMessageEntity) -> Unit
     ) {
         viewModelScope.launch {
             repositoryRemote.setChatMessage(
@@ -185,7 +186,7 @@ class ChatViewModel(
 
                     HttpClientCore.HttpStatus.Completed -> {
                         data?.let { chatMessageResponse ->
-                            chatMessageResponse.text
+                            onSuccess(chatMessageResponse.mapToChatMessageEntity())
                         }
                         pushProgressBar(false)
                     }
