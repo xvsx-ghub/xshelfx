@@ -12,6 +12,7 @@ import com.xvsx.shelf.data.local.dataBase.entity.RequestEntity
 import com.xvsx.shelf.data.local.dataBase.entity.StompEntity
 import com.xvsx.shelf.data.local.dataBase.entity.TaskEntity
 import com.xvsx.shelf.data.local.dataBase.entity.TruckReportEntity
+import com.xvsx.shelf.data.local.dataBase.entity.UserEntity
 import com.xvsx.shelf.data.local.dataBase.entity.WasteTypeEntity
 import com.xvsx.shelf.util.System
 import kotlinx.coroutines.flow.Flow
@@ -443,5 +444,26 @@ class RepositoryLocal(
 
     fun getChatMessageEntityListAsFlow(): Flow<List<ChatMessageEntity>?> {
         return appDatabase.getChatMessageDao().getListAsFlow()
+    }
+
+
+    suspend fun clearUserEntityList(){
+        return appDatabase.getUserDao().clear()
+    }
+
+    suspend fun insertUserEntity(userEntity: UserEntity): Long {
+        return appDatabase.getUserDao().insert(userEntity)
+    }
+
+    suspend fun insertUserEntityList(userEntityList: List<UserEntity>) {
+        return appDatabase.getUserDao().insertAll(userEntityList)
+    }
+
+    suspend fun getUserEntityList(): List<UserEntity>? {
+        return appDatabase.getUserDao().getList()
+    }
+
+    fun getUserEntityListAsFlow(): Flow<List<UserEntity>?> {
+        return appDatabase.getUserDao().getListAsFlow()
     }
 }

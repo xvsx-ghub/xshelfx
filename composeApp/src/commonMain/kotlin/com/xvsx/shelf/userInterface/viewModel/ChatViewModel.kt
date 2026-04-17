@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.xvsx.shelf.data.local.RepositoryLocal
 import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
+import com.xvsx.shelf.data.local.dataBase.entity.UserEntity
 import com.xvsx.shelf.data.remote.RepositoryRemote
 import com.xvsx.shelf.data.remote.http.HttpClientCore
 import kotlinx.coroutines.delay
@@ -23,14 +24,16 @@ class ChatViewModel(
     data class State(
         val uiNotificationMessage: String?,
         val progressBarVisibilityStatus: Boolean,
-        val chatMessageEntityList: List<ChatMessageEntity>?
+        val chatMessageEntityList: List<ChatMessageEntity>?,
+        val userEntity: UserEntity?
     )
 
     var state by mutableStateOf(
         State(
             uiNotificationMessage = null,
             progressBarVisibilityStatus = false,
-            chatMessageEntityList = null
+            chatMessageEntityList = null,
+            userEntity = null
         )
     )
         private set
@@ -50,6 +53,7 @@ class ChatViewModel(
     init {
         serveChatMessagesLocal()
         serveChatMessagesRemote()
+        serveUser()
     }
 
     fun serveChatMessagesLocal() {
@@ -76,11 +80,24 @@ class ChatViewModel(
                     when (status) {
                         HttpClientCore.HttpStatus.Completed -> {
                             data?.let { chatMessageResponse ->
-                                chatMessageResponse.mapToChatMessageEntityList()?.let {
-                                    repositoryLocal.clearChatMessageEntityList()
-                                    repositoryLocal.insertChatMessageEntityList(
-                                        it
-                                    )
+                                chatMessageResponse.mapToChatMessageEntityList()?.let { nnRemoteChatMessageEntity ->
+                                    if(nnRemoteChatMessageEntity.isEmpty()) return@getChatMessageList
+
+                                    repositoryLocal.getChatMessageEntityList()?.let { nnLocalChatMessageEntity ->
+                                        if(nnLocalChatMessageEntity.isEmpty()){
+                                            repositoryLocal.clearChatMessageEntityList()
+                                            repositoryLocal.insertChatMessageEntityList(
+                                                nnRemoteChatMessageEntity
+                                            )
+                                        }else{
+                                            if(nnLocalChatMessageEntity.last().createdAt != nnRemoteChatMessageEntity.last().createdAt){
+                                                repositoryLocal.clearChatMessageEntityList()
+                                                repositoryLocal.insertChatMessageEntityList(
+                                                    nnRemoteChatMessageEntity
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -89,7 +106,27 @@ class ChatViewModel(
                     }
                 }
 
-                delay(10000)
+                delay(1000)
+            }
+        }
+    }
+
+    fun serveUser() {
+        viewModelScope.launch {
+            repositoryLocal.getUserEntityList()?.let {
+                if(it.isNotEmpty()) {
+                    state = state.copy(userEntity = it[0])
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            repositoryLocal.getUserEntityListAsFlow().collect { userEntityList ->
+                userEntityList?.let {
+                    if(it.isNotEmpty()) {
+                        state = state.copy(userEntity = it[0])
+                    }
+                }
             }
         }
     }
@@ -129,12 +166,12 @@ class ChatViewModel(
     }
 
     fun setChatMessages(
-        nickname: String,
         text: String
     ) {
         viewModelScope.launch {
             repositoryRemote.setChatMessage(
-                nickname, text
+                state.userEntity?.nickname ?: "anonymous",
+                text
             ) { status, data, error ->
                 error?.let {
                     setUiNotification(error.message)
@@ -159,6 +196,14 @@ class ChatViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun updateUser(nickname: String){
+        if(nickname.isEmpty()) return
+        viewModelScope.launch {
+            repositoryLocal.clearUserEntityList()
+            repositoryLocal.insertUserEntity(UserEntity(nickname = nickname))
         }
     }
 }

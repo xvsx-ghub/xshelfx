@@ -15,6 +15,7 @@ import com.xvsx.shelf.data.local.dataBase.dao.RequestDao
 import com.xvsx.shelf.data.local.dataBase.dao.StompDao
 import com.xvsx.shelf.data.local.dataBase.dao.TaskDao
 import com.xvsx.shelf.data.local.dataBase.dao.TruckReportDao
+import com.xvsx.shelf.data.local.dataBase.dao.UserDao
 import com.xvsx.shelf.data.local.dataBase.dao.WasteTypeDao
 import com.xvsx.shelf.data.local.dataBase.entity.AuthorizationEntity
 import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
@@ -27,6 +28,7 @@ import com.xvsx.shelf.data.local.dataBase.entity.RequestEntity
 import com.xvsx.shelf.data.local.dataBase.entity.StompEntity
 import com.xvsx.shelf.data.local.dataBase.entity.TaskEntity
 import com.xvsx.shelf.data.local.dataBase.entity.TruckReportEntity
+import com.xvsx.shelf.data.local.dataBase.entity.UserEntity
 import com.xvsx.shelf.data.local.dataBase.entity.WasteTypeEntity
 
 @Database(
@@ -42,9 +44,10 @@ import com.xvsx.shelf.data.local.dataBase.entity.WasteTypeEntity
         WasteTypeEntity::class,
         DestinationEntity::class,
         JobEntity::class,
-        ChatMessageEntity::class
+        ChatMessageEntity::class,
+        UserEntity::class
     ],
-    version = 37
+    version = 38
 )
 
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -62,4 +65,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getDestinationDao(): DestinationDao
     abstract fun getJobDao(): JobDao
     abstract fun getChatMessageDao(): ChatMessageDao
+    abstract fun getUserDao(): UserDao
 }
