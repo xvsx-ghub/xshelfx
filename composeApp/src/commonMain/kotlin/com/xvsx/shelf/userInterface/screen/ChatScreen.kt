@@ -115,6 +115,15 @@ class ChatScreen() : Screen {
                             unfocusedTextColor = Color.Black
                         )
                     )
+                    TextButton(
+                        onClick = {
+                            chatViewModel.setChatMessages(draft) {
+                                draft = ""
+                            }
+                        },
+                    ) {
+                        Text("Home")
+                    }
                 }
             },
             content = { innerPadding ->

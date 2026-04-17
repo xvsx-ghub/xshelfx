@@ -2,9 +2,9 @@ package com.xvsx.shelf.data.local.dataBase.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
 
 @Entity(tableName = "ChatMessageEntity")
 data class ChatMessageEntity(
@@ -20,7 +20,7 @@ data class ChatMessageEntity(
 ) {
     fun getIsoTimestamp(): String {
         createdAt?.let {
-            val instant = Instant.parse(createdAt)
+            val instant = Instant.parse(it)
             val local = instant.toLocalDateTime(TimeZone.currentSystemDefault())
 
             return "${local.date} ${
