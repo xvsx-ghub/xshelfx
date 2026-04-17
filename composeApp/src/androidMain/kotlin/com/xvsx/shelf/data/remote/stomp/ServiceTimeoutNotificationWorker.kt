@@ -54,7 +54,7 @@ class ServiceTimeoutNotificationWorker (
         }
 
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_logo)
             .setContentTitle(context.getString(R.string.app_name))
             .setContentText(context.getString(R.string.please_open_the_app_to_keep_your_data_syncing_fast))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
