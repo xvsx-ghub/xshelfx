@@ -215,7 +215,7 @@ class ChatScreen() : Screen {
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = chatMessageEntity.createdAt ?: "",
+                text = chatMessageEntity.getIsoTimestamp(),
                 color = Color.Gray,
                 fontSize = 12.sp
             )
@@ -241,7 +241,7 @@ class ChatScreen() : Screen {
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = chatMessageEntity.createdAt ?: "",
+                text = chatMessageEntity.getIsoTimestamp(),
                 color = Color.Gray,
                 fontSize = 12.sp
             )
