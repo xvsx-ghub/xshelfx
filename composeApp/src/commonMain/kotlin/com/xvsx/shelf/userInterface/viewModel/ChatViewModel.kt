@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.xvsx.shelf.data.local.RepositoryLocal
 import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
+import com.xvsx.shelf.data.local.dataBase.entity.ContactEntity
 import com.xvsx.shelf.data.local.dataBase.entity.UserEntity
 import com.xvsx.shelf.data.remote.RepositoryRemote
 import com.xvsx.shelf.data.remote.http.HttpClientCore
@@ -56,7 +57,7 @@ class ChatViewModel(
         serveUser()
     }
 
-    fun serveChatMessagesLocal() {
+    private fun serveChatMessagesLocal() {
         viewModelScope.launch {
             repositoryLocal.getChatMessageEntityList()?.let {
                 state = state.copy(chatMessageEntityList = it)
@@ -70,7 +71,7 @@ class ChatViewModel(
         }
     }
 
-    fun serveChatMessagesRemote() {
+    private fun serveChatMessagesRemote() {
         viewModelScope.launch {
             while (true) {
                 repositoryRemote.getChatMessageList { status, data, error ->
@@ -111,7 +112,7 @@ class ChatViewModel(
         }
     }
 
-    fun serveUser() {
+    private fun serveUser() {
         viewModelScope.launch {
             repositoryLocal.getUserEntityList()?.let {
                 if(it.isNotEmpty()) {
@@ -204,6 +205,23 @@ class ChatViewModel(
         viewModelScope.launch {
             repositoryLocal.clearUserEntityList()
             repositoryLocal.insertUserEntity(UserEntity(nickname = nickname))
+        }
+    }
+
+    fun createIfNewContact(
+        nickname: String,
+        onSuccess: (contactEntity: ContactEntity) -> Unit
+    ) {
+        if (nickname.isEmpty()) return
+        viewModelScope.launch {
+            val existingContactList = repositoryLocal.getContactEntityListByNickname(nickname)
+            if(!existingContactList.isNullOrEmpty())return@launch
+
+            var newContactEntity = ContactEntity(nickname = nickname)
+            val id = repositoryLocal.insertContactEntity(newContactEntity)
+            newContactEntity = newContactEntity.copy(id = id)
+            onSuccess(newContactEntity)
+            setUiNotification("$nickname added to contact list")
         }
     }
 }

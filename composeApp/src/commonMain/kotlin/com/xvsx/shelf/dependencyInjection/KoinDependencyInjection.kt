@@ -9,8 +9,10 @@ import com.xvsx.shelf.data.remote.http.Http
 import com.xvsx.shelf.data.remote.stomp.StompManager
 import com.xvsx.shelf.data.useCase.LoginUseCase
 import com.xvsx.shelf.userInterface.screen.ChatScreen
+import com.xvsx.shelf.userInterface.screen.HomeScreen
 import com.xvsx.shelf.userInterface.screen.SplashScreen
 import com.xvsx.shelf.userInterface.viewModel.ChatViewModel
+import com.xvsx.shelf.userInterface.viewModel.HomeViewModel
 import com.xvsx.shelf.userInterface.viewModel.SplashViewModel
 import com.xvsx.shelf.util.System
 import org.koin.dsl.module
@@ -18,9 +20,11 @@ import org.koin.dsl.module
 val baseApplicationModule = module {
     single { SplashScreen() }
     single { ChatScreen() }
+    single { HomeScreen() }
 
     single { SplashViewModel(get (), get()) }
     single { ChatViewModel(get (), get()) }
+    single { HomeViewModel(get(), get()) }
 
     single<Settings> { Settings() }
     single { SettingsManager(get()) }

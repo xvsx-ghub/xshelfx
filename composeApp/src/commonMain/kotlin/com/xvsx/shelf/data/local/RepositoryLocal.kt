@@ -3,6 +3,7 @@ package com.xvsx.shelf.data.local
 import com.xvsx.shelf.data.local.dataBase.AppDatabase
 import com.xvsx.shelf.data.local.dataBase.entity.AuthorizationEntity
 import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
+import com.xvsx.shelf.data.local.dataBase.entity.ContactEntity
 import com.xvsx.shelf.data.local.dataBase.entity.CustomerEntity
 import com.xvsx.shelf.data.local.dataBase.entity.CustomerTaskEntity
 import com.xvsx.shelf.data.local.dataBase.entity.DestinationEntity
@@ -465,5 +466,38 @@ class RepositoryLocal(
 
     fun getUserEntityListAsFlow(): Flow<List<UserEntity>?> {
         return appDatabase.getUserDao().getListAsFlow()
+    }
+
+
+    suspend fun clearContactEntityList(){
+        return appDatabase.getContactDao().clear()
+    }
+
+    suspend fun insertContactEntity(contactEntity: ContactEntity): Long {
+        return appDatabase.getContactDao().insert(contactEntity)
+    }
+
+    suspend fun insertContactEntityList(contactEntityList: List<ContactEntity>) {
+        return appDatabase.getContactDao().insertAll(contactEntityList)
+    }
+
+    suspend fun getContactEntityList(): List<ContactEntity>? {
+        return appDatabase.getContactDao().getList()
+    }
+
+    fun getContactEntityListAsFlow(): Flow<List<ContactEntity>?> {
+        return appDatabase.getContactDao().getListAsFlow()
+    }
+
+    suspend fun getContactEntityListByNickname(nickname: String): List<ContactEntity>?{
+        return appDatabase.getContactDao().getSameByNickname(nickname)
+    }
+
+    suspend fun getContactEntityListSameByNickname(nickname: String): List<ContactEntity>?{
+        return appDatabase.getContactDao().getSameByNickname(nickname)
+    }
+
+    suspend fun deleteContactEntity(contactEntity: ContactEntity){
+        appDatabase.getContactDao().deleteContact(contactEntity)
     }
 }

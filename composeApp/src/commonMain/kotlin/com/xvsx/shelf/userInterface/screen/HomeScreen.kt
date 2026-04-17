@@ -25,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -34,12 +33,12 @@ import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.internal.BackHandler
-import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
+import com.xvsx.shelf.data.local.dataBase.entity.ContactEntity
 import com.xvsx.shelf.userInterface.element.MulticolorProgressBar
-import com.xvsx.shelf.userInterface.viewModel.ChatViewModel
+import com.xvsx.shelf.userInterface.viewModel.HomeViewModel
 import org.koin.compose.koinInject
 
-class ChatScreen() : Screen {
+class HomeScreen() : Screen {
     companion object {
         const val TAG = "ChatScreen"
     }
@@ -47,7 +46,7 @@ class ChatScreen() : Screen {
     @OptIn(ExperimentalComposeUiApi::class, InternalVoyagerApi::class)
     @Composable
     override fun Content() {
-        val chatViewModel: ChatViewModel = koinInject()
+        val homeViewModel: HomeViewModel = koinInject()
 
         BackHandler(enabled = true) {}
 
@@ -55,19 +54,19 @@ class ChatScreen() : Screen {
             modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)
                 .background(Color.Black),
         ) {
-            ContentView(chatViewModel)
+            ContentView(homeViewModel)
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ContentView(
-        chatViewModel: ChatViewModel
+        homeViewModel: HomeViewModel
     ) {
         val snackbarHostState = remember { SnackbarHostState() }
         val focusManager = LocalFocusManager.current
         val navigator = LocalNavigator.current
-        val homeScreen: HomeScreen = koinInject()
+        val chatScreen: ChatScreen = koinInject()
 
         Scaffold(
             modifier = Modifier
@@ -86,25 +85,21 @@ class ChatScreen() : Screen {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    var draft by remember { mutableStateOf("") }
-                    var isFocused by remember { mutableStateOf(false) }
-
-                    LaunchedEffect(chatViewModel.state.userEntity) {
-                        draft = chatViewModel.state.userEntity?.nickname ?: ""
+                    TextButton(
+                        onClick = {
+                            navigator?.push(chatScreen)
+                        },
+                    ) {
+                        Text("Chat")
                     }
 
+                    var draft by remember { mutableStateOf("") }
                     OutlinedTextField(
-                        modifier = Modifier
-                            .weight(1f)
-                            .onFocusChanged { focusState ->
-                                if (isFocused && !focusState.isFocused) {
-                                    chatViewModel.updateUser(draft)
-                                }
-                                isFocused = focusState.isFocused
-                            },
+                        modifier = Modifier.weight(1f),
                         value = draft,
                         onValueChange = {
                             draft = it
+                            homeViewModel.searchContact(draft) {}
                         },
                         placeholder = {
                             Text(
@@ -118,13 +113,6 @@ class ChatScreen() : Screen {
                             unfocusedTextColor = Color.Black
                         )
                     )
-                    TextButton(
-                        onClick = {
-                            navigator?.push(homeScreen)
-                        },
-                    ) {
-                        Text("Home")
-                    }
                 }
             },
             content = { innerPadding ->
@@ -133,13 +121,14 @@ class ChatScreen() : Screen {
                         .padding(innerPadding)
                         .fillMaxSize(),
                 ) {
+                    val listState = rememberLazyListState()
+
                     Text(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        text = "Chat"
+                        text = "Contacts"
                     )
 
-                    val listState = rememberLazyListState()
-                    chatViewModel.state.chatMessageEntityList?.let { nnChatMessageEntityList ->
+                    homeViewModel.state.contactEntityList?.let { nnContactEntityList ->
                         LazyColumn(
                             state = listState,
                             modifier = Modifier
@@ -148,20 +137,16 @@ class ChatScreen() : Screen {
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            items(nnChatMessageEntityList, key = { it.id }) { message ->
-                                if (chatViewModel.state.userEntity?.nickname == message.nickname) {
-                                    OutcomingChatMessage(message)
-                                } else {
-                                    IncomingChatMessage(message){ nickname ->
-                                        chatViewModel.createIfNewContact(nickname){}
-                                    }
+                            items(nnContactEntityList, key = { it.id }) { item ->
+                                Contact(item){contactEntity ->
+                                    homeViewModel.deleteContact(contactEntity)
                                 }
                             }
                         }
 
-                        LaunchedEffect(nnChatMessageEntityList.size) {
-                            if (nnChatMessageEntityList.isNotEmpty()) {
-                                listState.animateScrollToItem(nnChatMessageEntityList.size - 1)
+                        LaunchedEffect(nnContactEntityList.size) {
+                            if (nnContactEntityList.isNotEmpty()) {
+                                listState.animateScrollToItem(nnContactEntityList.size - 1)
                             }
                         }
                     }
@@ -183,12 +168,11 @@ class ChatScreen() : Screen {
                         onValueChange = { draft = it },
                         placeholder = {
                             Text(
-                                "Message",
+                                "Nickname",
                                 color = Color.Gray
                             )
                         },
-                        singleLine = false,
-                        maxLines = 5,
+                        singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = Color.Black,
                             unfocusedTextColor = Color.Black
@@ -196,22 +180,22 @@ class ChatScreen() : Screen {
                     )
                     TextButton(
                         onClick = {
-                            chatViewModel.setChatMessages(draft) {
+                            homeViewModel.createContact(draft) {
                                 draft = ""
                             }
                         },
                     ) {
-                        Text("Send")
+                        Text("Add")
                     }
                 }
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         )
 
-        MulticolorProgressBar(visibilityStatus = chatViewModel.state.progressBarVisibilityStatus)
-        key(chatViewModel.state.uiNotificationMessage) {
+        MulticolorProgressBar(visibilityStatus = homeViewModel.state.progressBarVisibilityStatus)
+        key(homeViewModel.state.uiNotificationMessage) {
             LaunchedEffect(Unit) {
-                chatViewModel.state.uiNotificationMessage?.let {
+                homeViewModel.state.uiNotificationMessage?.let {
                     snackbarHostState.showSnackbar(it)
                 }
             }
@@ -219,51 +203,24 @@ class ChatScreen() : Screen {
     }
 
     @Composable
-    fun OutcomingChatMessage(chatMessageEntity: ChatMessageEntity) {
-        Column(
+    fun Contact(contactEntity: ContactEntity, onDelete: (contactEntity: ContactEntity) -> Unit) {
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.End
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = chatMessageEntity.text ?: "",
+                modifier = Modifier.weight(1f),
+                text = contactEntity.nickname ?: "",
                 color = Color.Black,
                 fontSize = 16.sp
             )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = chatMessageEntity.getIsoTimestamp(),
-                color = Color.Gray,
-                fontSize = 12.sp
-            )
-        }
-    }
-
-    @Composable
-    fun IncomingChatMessage(chatMessageEntity: ChatMessageEntity, onCreateContact: (nickname: String)-> Unit) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                modifier = Modifier.clickable{
-                    onCreateContact(chatMessageEntity.nickname ?: "")
+            TextButton(
+                onClick = {
+                    onDelete(contactEntity)
                 },
-                text = chatMessageEntity.nickname ?: "",
-                color = Color.Gray,
-                fontSize = 12.sp
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = chatMessageEntity.text ?: "",
-                color = Color.Black,
-                fontSize = 16.sp
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = chatMessageEntity.getIsoTimestamp(),
-                color = Color.Gray,
-                fontSize = 12.sp
-            )
+            ) {
+                Text("Delete")
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.xvsx.shelf.data.local.dataBase.dao.AuthorizationDao
 import com.xvsx.shelf.data.local.dataBase.dao.ChatMessageDao
+import com.xvsx.shelf.data.local.dataBase.dao.ContactDao
 import com.xvsx.shelf.data.local.dataBase.dao.CustomerDao
 import com.xvsx.shelf.data.local.dataBase.dao.CustomerTaskDao
 import com.xvsx.shelf.data.local.dataBase.dao.DestinationDao
@@ -19,6 +20,7 @@ import com.xvsx.shelf.data.local.dataBase.dao.UserDao
 import com.xvsx.shelf.data.local.dataBase.dao.WasteTypeDao
 import com.xvsx.shelf.data.local.dataBase.entity.AuthorizationEntity
 import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
+import com.xvsx.shelf.data.local.dataBase.entity.ContactEntity
 import com.xvsx.shelf.data.local.dataBase.entity.CustomerEntity
 import com.xvsx.shelf.data.local.dataBase.entity.CustomerTaskEntity
 import com.xvsx.shelf.data.local.dataBase.entity.DestinationEntity
@@ -45,9 +47,10 @@ import com.xvsx.shelf.data.local.dataBase.entity.WasteTypeEntity
         DestinationEntity::class,
         JobEntity::class,
         ChatMessageEntity::class,
-        UserEntity::class
+        UserEntity::class,
+        ContactEntity::class
     ],
-    version = 38
+    version = 39
 )
 
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -66,4 +69,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getJobDao(): JobDao
     abstract fun getChatMessageDao(): ChatMessageDao
     abstract fun getUserDao(): UserDao
+    abstract fun getContactDao(): ContactDao
 }
