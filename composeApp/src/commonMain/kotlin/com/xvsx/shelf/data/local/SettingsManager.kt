@@ -7,12 +7,14 @@ class SettingsManager(
     private val settings: Settings
 ) {
     companion object {
-        private const val BASE_URL_KEY = "https://compellingly-presynsacral-albertine.ngrok-free.dev/"
+        private const val BASE_URL_KEY = "BASE_URL_KEY"
         private const val WIS_URL_KEY = "wisUrl"
         private const val WIS_NAME_KEY = "wisName"
         private const val SESSION_KEY_KEY = "sessionKey"
         private const val ROSTER_ID_KEY = "rosterId"
         private const val TRANSACTION_ID = "transactionId"
+        private const val CURRENT_USER_NAME_KEY = "CURRENT_USER_NAME_KEY"
+        private const val CURRENT_CONTACT_NAME_KEY = "CURRENT_CONTACT_NAME_KEY"
     }
 
     var baseUrl: String
@@ -42,6 +44,14 @@ class SettingsManager(
             else settings.set(TRANSACTION_ID, id - 1)
             return id
         }
+
+    var currentUserName: String
+        get() = settings.getString(CURRENT_USER_NAME_KEY, "")
+        set(value) = settings.set(CURRENT_USER_NAME_KEY, value)
+
+    var currentContactName: String
+        get() = settings.getString(CURRENT_CONTACT_NAME_KEY, "")
+        set(value) = settings.set(CURRENT_CONTACT_NAME_KEY, value)
 
     fun clearAll() {
         settings.clear()

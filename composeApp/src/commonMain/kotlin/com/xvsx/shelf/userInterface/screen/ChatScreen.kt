@@ -16,7 +16,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +43,7 @@ import com.xvsx.shelf.userInterface.viewModel.ChatViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import shelf.composeapp.generated.resources.Res
+import shelf.composeapp.generated.resources.ic_check
 import shelf.composeapp.generated.resources.ic_contacts
 import shelf.composeapp.generated.resources.ic_send
 
@@ -56,6 +56,10 @@ class ChatScreen() : Screen {
     @Composable
     override fun Content() {
         val chatViewModel: ChatViewModel = koinInject()
+
+        LaunchedEffect(Unit) {
+            chatViewModel.refreshState()
+        }
 
         BackHandler(enabled = true) {}
 
@@ -96,55 +100,102 @@ class ChatScreen() : Screen {
                     focusManager.clearFocus()
                 },
             topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    var draft by remember { mutableStateOf("") }
-                    var isFocused by remember { mutableStateOf(false) }
+                Column {
+                    if(chatViewModel.state.currentUserName.isNullOrEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            var draft by remember { mutableStateOf("") }
+                            LaunchedEffect(chatViewModel.state.currentUserName) {
+                                draft = chatViewModel.state.currentUserName ?: ""
+                            }
 
-                    LaunchedEffect(chatViewModel.state.userEntity) {
-                        draft = chatViewModel.state.userEntity?.nickname ?: ""
-                    }
-
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .weight(1f)
-                            .onFocusChanged { focusState ->
-                                if (isFocused && !focusState.isFocused) {
-                                    chatViewModel.updateUser(draft)
-                                }
-                                isFocused = focusState.isFocused
-                            },
-                        value = draft,
-                        onValueChange = {
-                            draft = it
-                        },
-                        placeholder = {
-                            Text(
-                                "Set your nickname",
-                                color = Color.Gray
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .weight(1f),
+                                value = draft,
+                                onValueChange = {
+                                    draft = it
+                                },
+                                placeholder = {
+                                    Text(
+                                        "Set your nickname",
+                                        color = Color.Gray
+                                    )
+                                },
+                                singleLine = true,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White
+                                )
                             )
-                        },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        )
-                    )
-                    IconButton(
-                        onClick = {
-                            navigator?.push(contactListScreen)
+                            IconButton(
+                                onClick = {
+                                    chatViewModel.updateCurrentUser(draft)
+                                }
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_check),
+                                    contentDescription = "Approve nickname",
+                                    tint = Colors.White
+                                )
+                            }
                         }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_contacts),
-                            contentDescription = "Contacts",
-                            tint = Colors.White
+                        var draft by remember { mutableStateOf("") }
+                        var isFocused by remember { mutableStateOf(false) }
+
+                        LaunchedEffect(chatViewModel.state.currentContactName) {
+                            draft = chatViewModel.state.currentContactName ?: ""
+                        }
+
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .weight(1f)
+                                .onFocusChanged { focusState ->
+                                    if (isFocused && !focusState.isFocused) {
+                                        chatViewModel.updateCurrentContact(draft)
+                                    }
+                                    isFocused = focusState.isFocused
+                                },
+                            value = draft,
+                            onValueChange = {
+                                draft = it
+                            },
+                            placeholder = {
+                                Text(
+                                    "Select contact",
+                                    color = Color.Gray
+                                )
+                            },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White
+                            )
                         )
+                        IconButton(
+                            onClick = {
+                                navigator?.push(contactListScreen)
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_contacts),
+                                contentDescription = "Contacts",
+                                tint = Colors.White
+                            )
+                        }
                     }
                 }
             },
@@ -165,7 +216,7 @@ class ChatScreen() : Screen {
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             items(nnChatMessageEntityList, key = { it.id }) { message ->
-                                if (chatViewModel.state.userEntity?.nickname == message.nickname) {
+                                if (chatViewModel.state.currentUserName == message.nickname) {
                                     OutcomingChatMessage(message)
                                 } else {
                                     IncomingChatMessage(message) { nickname ->

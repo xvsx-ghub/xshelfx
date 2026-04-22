@@ -43,9 +43,11 @@ import com.xvsx.shelf.userInterface.viewModel.ContactListViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import shelf.composeapp.generated.resources.Res
+import shelf.composeapp.generated.resources.ic_add
 import shelf.composeapp.generated.resources.ic_chat
-import shelf.composeapp.generated.resources.ic_contacts
+import shelf.composeapp.generated.resources.ic_check
 import shelf.composeapp.generated.resources.ic_person_add
+import shelf.composeapp.generated.resources.ic_person_check
 import shelf.composeapp.generated.resources.ic_person_remove
 import shelf.composeapp.generated.resources.ic_person_search
 
@@ -58,6 +60,10 @@ class ContactListScreen() : Screen {
     @Composable
     override fun Content() {
         val contactListViewModel: ContactListViewModel = koinInject()
+
+        LaunchedEffect(Unit) {
+            contactListViewModel.refreshState()
+        }
 
         BackHandler(enabled = true) {}
 
@@ -98,49 +104,100 @@ class ContactListScreen() : Screen {
                     focusManager.clearFocus()
                 },
             topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    var draft by remember { mutableStateOf("") }
-                    OutlinedTextField(
-                        modifier = Modifier.weight(1f),
-                        value = draft,
-                        onValueChange = {
-                            draft = it
-                            contactListViewModel.searchContact(draft) {}
-                        },
-                        placeholder = {
-                            Text(
-                                text = "Search contact",
-                                color = Color.Gray
-                            )
-                        },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Colors.White,
-                            unfocusedTextColor = Colors.White
-                        ),
-                        trailingIcon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_person_search),
-                                contentDescription = "Search contact",
-                                tint = Colors.Gray
-                            )
-                        }
-                    )
-                    IconButton(
-                        onClick = {
-                            navigator?.push(chatScreen)
-                        }
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_chat),
-                            contentDescription = "Chat",
-                            tint = Colors.White
+                        var draft by remember { mutableStateOf("") }
+                        LaunchedEffect(contactListViewModel.state.currentUserName) {
+                            draft = contactListViewModel.state.currentUserName ?: ""
+                        }
+                        IconButton(
+                            onClick = {
+                                navigator?.push(chatScreen)
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_chat),
+                                contentDescription = "Chat",
+                                tint = Colors.White
+                            )
+                        }
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .weight(1f),
+                            value = draft,
+                            onValueChange = {
+                                draft = it
+                            },
+                            placeholder = {
+                                Text(
+                                    "Set your nickname",
+                                    color = Color.Gray
+                                )
+                            },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White
+                            ),
+                            trailingIcon = {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_person_check),
+                                    contentDescription = "User",
+                                    tint = Colors.Gray
+                                )
+                            }
+                        )
+                        IconButton(
+                            onClick = {
+                                contactListViewModel.updateCurrentUser(draft)
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_check),
+                                contentDescription = "Approve nickname",
+                                tint = Colors.White
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        var draft by remember { mutableStateOf("") }
+                        OutlinedTextField(
+                            modifier = Modifier.weight(1f),
+                            value = draft,
+                            onValueChange = {
+                                draft = it
+                                contactListViewModel.searchContact(draft) {}
+                            },
+                            placeholder = {
+                                Text(
+                                    text = "Search contact",
+                                    color = Color.Gray
+                                )
+                            },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Colors.White,
+                                unfocusedTextColor = Colors.White
+                            ),
+                            trailingIcon = {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_person_search),
+                                    contentDescription = "Search contact",
+                                    tint = Colors.Gray
+                                )
+                            }
                         )
                     }
                 }
@@ -162,9 +219,18 @@ class ContactListScreen() : Screen {
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             items(nnContactEntityList, key = { it.id }) { item ->
-                                Contact(item) { contactEntity ->
-                                    contactListViewModel.deleteContact(contactEntity)
-                                }
+                                Contact(
+                                    contactEntity = item,
+                                    onDelete = { contactEntity ->
+                                        contactListViewModel.deleteContact(contactEntity)
+                                    },
+                                    onClick = { contactEntity ->
+                                        contactEntity.nickname?.let {
+                                            contactListViewModel.updateCurrentContact(it)
+                                            navigator?.push(chatScreen)
+                                        }
+                                    }
+                                )
                             }
                         }
 
@@ -192,7 +258,7 @@ class ContactListScreen() : Screen {
                         onValueChange = { draft = it },
                         placeholder = {
                             Text(
-                                "Create contact",
+                                "Add contact",
                                 color = Colors.Gray
                             )
                         },
@@ -200,17 +266,25 @@ class ContactListScreen() : Screen {
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = Colors.White,
                             unfocusedTextColor = Colors.White
-                        )
+                        ),
+                        trailingIcon = {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_person_add),
+                                contentDescription = "User",
+                                tint = Colors.Gray
+                            )
+                        }
                     )
 
                     IconButton(
                         onClick = {
                             contactListViewModel.createContact(draft) {
                                 draft = ""
-                            }                        }
+                            }
+                        }
                     ) {
                         Icon(
-                            painter = painterResource(Res.drawable.ic_person_add),
+                            painter = painterResource(Res.drawable.ic_add),
                             contentDescription = "Add",
                             tint = Colors.White
                         )
@@ -231,9 +305,17 @@ class ContactListScreen() : Screen {
     }
 
     @Composable
-    fun Contact(contactEntity: ContactEntity, onDelete: (contactEntity: ContactEntity) -> Unit) {
+    fun Contact(
+        contactEntity: ContactEntity,
+        onDelete: (contactEntity: ContactEntity) -> Unit,
+        onClick: (contactEntity: ContactEntity) -> Unit
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onClick(contactEntity)
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(

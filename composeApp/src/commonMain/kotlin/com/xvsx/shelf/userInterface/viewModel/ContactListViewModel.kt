@@ -23,16 +23,24 @@ class ContactListViewModel(
         val uiNotificationMessage: String?,
         val progressBarVisibilityStatus: Boolean,
         val contactEntityList: List<ContactEntity>?,
+        val currentUserName: String?
     )
 
     var state by mutableStateOf(
         State(
             uiNotificationMessage = null,
             progressBarVisibilityStatus = false,
-            contactEntityList = null
+            contactEntityList = null,
+            currentUserName = null
         )
     )
         private set
+
+    fun refreshState(){
+        state = state.copy(
+            currentUserName = repositoryLocal.getCurrentUserName(),
+        )
+    }
 
     private fun setUiNotification(message: String?) {
         state = state.copy(uiNotificationMessage = message)
@@ -47,6 +55,7 @@ class ContactListViewModel(
     }
 
     init {
+        state = state.copy(currentUserName = repositoryLocal.getCurrentUserName())
         serveContact()
     }
 
@@ -96,5 +105,15 @@ class ContactListViewModel(
         viewModelScope.launch {
             repositoryLocal.deleteContactEntity(contactEntity)
         }
+    }
+
+    fun updateCurrentUser(name: String) {
+        state = state.copy(currentUserName = name)
+        repositoryLocal.setCurrentUserName(name)
+        setUiNotification("Nickname changed to $name")
+    }
+
+    fun updateCurrentContact(name: String) {
+        repositoryLocal.setCurrentContactName(name)
     }
 }

@@ -40,6 +40,8 @@ class RepositoryLocal(
     private var wisName: String? = null
     private var sessionKey: String? = null
     private var rosterId: String? = null
+    private var currentUserName: String? = null
+    private var currentContactName: String? = null
 
     fun setBaseUrl(value: String?) {
         baseUrl = value
@@ -499,5 +501,25 @@ class RepositoryLocal(
 
     suspend fun deleteContactEntity(contactEntity: ContactEntity){
         appDatabase.getContactDao().deleteContact(contactEntity)
+    }
+
+    fun setCurrentUserName(value: String?) {
+        currentUserName = value
+        settingsManager.currentUserName = value ?: ""
+    }
+
+    fun getCurrentUserName(): String {
+        if(currentUserName.isNullOrEmpty()) currentUserName = settingsManager.currentUserName
+        return currentUserName!!
+    }
+
+    fun setCurrentContactName(value: String?) {
+        currentContactName = value
+        settingsManager.currentContactName = value ?: ""
+    }
+
+    fun getCurrentContactName(): String {
+        if(currentContactName.isNullOrEmpty()) currentContactName = settingsManager.currentContactName
+        return currentContactName!!
     }
 }
