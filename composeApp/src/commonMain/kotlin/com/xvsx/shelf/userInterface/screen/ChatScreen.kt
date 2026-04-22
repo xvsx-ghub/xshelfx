@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -26,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -34,10 +37,15 @@ import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.internal.BackHandler
+import com.wiswm.nav.support.resources.Colors
 import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
 import com.xvsx.shelf.userInterface.element.MulticolorProgressBar
 import com.xvsx.shelf.userInterface.viewModel.ChatViewModel
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
+import shelf.composeapp.generated.resources.Res
+import shelf.composeapp.generated.resources.ic_contacts
+import shelf.composeapp.generated.resources.ic_send
 
 class ChatScreen() : Screen {
     companion object {
@@ -52,8 +60,16 @@ class ChatScreen() : Screen {
         BackHandler(enabled = true) {}
 
         Box(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)
-                .background(Color.Black),
+            modifier = Modifier
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Colors.DarkRoyalBlue,
+                            Colors.DeepSpaceBlue
+                        )
+                    )
+                )
         ) {
             ContentView(chatViewModel)
         }
@@ -67,9 +83,10 @@ class ChatScreen() : Screen {
         val snackbarHostState = remember { SnackbarHostState() }
         val focusManager = LocalFocusManager.current
         val navigator = LocalNavigator.current
-        val homeScreen: HomeScreen = koinInject()
+        val contactListScreen: ContactListScreen = koinInject()
 
         Scaffold(
+            containerColor = Color.Transparent,
             modifier = Modifier
                 .fillMaxSize()
                 .clickable(
@@ -108,22 +125,26 @@ class ChatScreen() : Screen {
                         },
                         placeholder = {
                             Text(
-                                "Nickname",
+                                "Set your nickname",
                                 color = Color.Gray
                             )
                         },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.Black,
-                            unfocusedTextColor = Color.Black
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
                         )
                     )
-                    TextButton(
+                    IconButton(
                         onClick = {
-                            navigator?.push(homeScreen)
-                        },
+                            navigator?.push(contactListScreen)
+                        }
                     ) {
-                        Text("Home")
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_contacts),
+                            contentDescription = "Contacts",
+                            tint = Colors.White
+                        )
                     }
                 }
             },
@@ -133,11 +154,6 @@ class ChatScreen() : Screen {
                         .padding(innerPadding)
                         .fillMaxSize(),
                 ) {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        text = "Chat"
-                    )
-
                     val listState = rememberLazyListState()
                     chatViewModel.state.chatMessageEntityList?.let { nnChatMessageEntityList ->
                         LazyColumn(
@@ -152,8 +168,8 @@ class ChatScreen() : Screen {
                                 if (chatViewModel.state.userEntity?.nickname == message.nickname) {
                                     OutcomingChatMessage(message)
                                 } else {
-                                    IncomingChatMessage(message){ nickname ->
-                                        chatViewModel.createIfNewContact(nickname){}
+                                    IncomingChatMessage(message) { nickname ->
+                                        chatViewModel.createIfNewContact(nickname) {}
                                     }
                                 }
                             }
@@ -183,25 +199,29 @@ class ChatScreen() : Screen {
                         onValueChange = { draft = it },
                         placeholder = {
                             Text(
-                                "Message",
+                                "Type a message",
                                 color = Color.Gray
                             )
                         },
                         singleLine = false,
                         maxLines = 5,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.Black,
-                            unfocusedTextColor = Color.Black
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
                         )
                     )
-                    TextButton(
+                    IconButton(
                         onClick = {
                             chatViewModel.setChatMessages(draft) {
                                 draft = ""
                             }
-                        },
+                        }
                     ) {
-                        Text("Send")
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_send),
+                            contentDescription = "Send",
+                            tint = Colors.White
+                        )
                     }
                 }
             },
@@ -226,7 +246,7 @@ class ChatScreen() : Screen {
         ) {
             Text(
                 text = chatMessageEntity.text ?: "",
-                color = Color.Black,
+                color = Color.White,
                 fontSize = 16.sp
             )
             Spacer(modifier = Modifier.height(2.dp))
@@ -239,13 +259,16 @@ class ChatScreen() : Screen {
     }
 
     @Composable
-    fun IncomingChatMessage(chatMessageEntity: ChatMessageEntity, onCreateContact: (nickname: String)-> Unit) {
+    fun IncomingChatMessage(
+        chatMessageEntity: ChatMessageEntity,
+        onCreateContact: (nickname: String) -> Unit
+    ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                modifier = Modifier.clickable{
+                modifier = Modifier.clickable {
                     onCreateContact(chatMessageEntity.nickname ?: "")
                 },
                 text = chatMessageEntity.nickname ?: "",
@@ -255,7 +278,7 @@ class ChatScreen() : Screen {
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = chatMessageEntity.text ?: "",
-                color = Color.Black,
+                color = Color.White,
                 fontSize = 16.sp
             )
             Spacer(modifier = Modifier.height(2.dp))

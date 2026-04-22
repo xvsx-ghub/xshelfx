@@ -40,5 +40,9 @@ class Colors {
         val VividBlue = Color(0xFF286EFF)
         val SaturatedBlue = Color(0xFF0F55E7)
         val LightGrey = Color(0xFFE8E8E8)
+
+        val DarkRoyalBlue = Color(0xFF00307E)
+        val DeepSpaceBlue = Color(0xFF080D2A)
+        val Gray = Color(0xFF888888)
     }
 }

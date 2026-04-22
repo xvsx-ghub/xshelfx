@@ -11,7 +11,7 @@ import com.xvsx.shelf.data.remote.RepositoryRemote
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class HomeViewModel(
+class ContactListViewModel(
     private val repositoryRemote: RepositoryRemote,
     private val repositoryLocal: RepositoryLocal
 ) : ViewModel() {
