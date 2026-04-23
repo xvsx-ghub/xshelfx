@@ -169,7 +169,6 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
 
     protected val recynRootUrl = "https://recyn.com/rest/rest"
     protected val client: HttpClient = HttpClientFactory().create()
-    protected var isLoading = false
 
     protected suspend inline fun <reified T> get(
         request: Request,
@@ -177,13 +176,7 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
     ) {
         var response: T? = null
         var exception: Exception? = null
-        if (isLoading) {
-            Logger.d(TAG, "Abort request to ${request.url}")
-            onEvent(HttpStatus.Busy, null, null)
-            return
-        }
         val fullUrl = buildUrlWithFormData(request)
-        isLoading = true
         onEvent(HttpStatus.Started, null, null)
         try {
             val httpResponse = withContext(Dispatchers.IO) {
@@ -217,7 +210,6 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
                 }
             }
         } finally {
-            isLoading = false
             onEvent(HttpStatus.Completed, response, exception)
         }
     }
@@ -229,13 +221,6 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
         var response: T? = null
         var exception: Exception? = null
 
-        if (isLoading) {
-            Logger.d(TAG, "Abort request to ${request.url}")
-            onEvent(HttpStatus.Busy, null, null)
-            return
-        }
-
-        isLoading = true
         onEvent(HttpStatus.Started, null, null)
         try {
             val httpResponse = withContext(Dispatchers.IO) {
@@ -272,7 +257,6 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
                 }
             }
         } finally {
-            isLoading = false
             onEvent(HttpStatus.Completed, response, exception)
         }
     }
@@ -284,13 +268,6 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
         var response: T? = null
         var exception: Exception? = null
 
-        if (isLoading) {
-            Logger.d(TAG, "Abort request to ${request.url}")
-            onEvent(HttpStatus.Busy, null, null)
-            return
-        }
-
-        isLoading = true
         onEvent(HttpStatus.Started, null, null)
         try {
             val httpResponse = withContext(Dispatchers.IO) {
@@ -327,7 +304,6 @@ open class HttpClientCore(protected val repositoryLocal: RepositoryLocal) {
                 }
             }
         } finally {
-            isLoading = false
             onEvent(HttpStatus.Completed, response, exception)
         }
     }
