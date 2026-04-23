@@ -11,15 +11,21 @@ class RepositoryRemote(
         const val TAG = "RepositoryRemote"
     }
 
-    suspend fun getChatMessageList(onEvent: suspend (status: HttpStatus, data: ChatMessageResponse?, error: Exception?) -> Unit) {
-        http.getChatMessageList(onEvent)
+    suspend fun getChatMessageList(
+        nickname: String,
+        clientName: String,
+        afterId: String,
+        onEvent: suspend (status: HttpStatus, data: ChatMessageResponse?, error: Exception?) -> Unit
+    ) {
+        http.getChatMessageList(nickname,clientName,afterId,onEvent)
     }
 
     suspend fun setChatMessage(
         nickname: String,
+        clientName: String,
         text: String,
         onEvent: suspend (status: HttpStatus, data: ChatMessageResponse.ChatMessage?, error: Exception?) -> Unit
     ) {
-        http.setChatMessage(nickname, text, onEvent)
+        http.setChatMessage(nickname, clientName, text, onEvent)
     }
 }

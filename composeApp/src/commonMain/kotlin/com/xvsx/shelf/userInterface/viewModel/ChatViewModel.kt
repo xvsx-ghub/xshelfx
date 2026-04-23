@@ -40,7 +40,7 @@ class ChatViewModel(
     )
         private set
 
-    fun refreshState(){
+    fun refreshState() {
         state = state.copy(
             currentUserName = repositoryLocal.getCurrentUserName(),
             currentContactName = repositoryLocal.getCurrentContactName()
@@ -85,7 +85,11 @@ class ChatViewModel(
     private fun serveChatMessagesRemote() {
         viewModelScope.launch {
             while (true) {
-                repositoryRemote.getChatMessageList { status, data, error ->
+                repositoryRemote.getChatMessageList(
+                    state.currentUserName ?: "anonymous",
+                    state.currentContactName ?: "anonymous",
+                    ""
+                ) { status, data, error ->
                     error?.let {
                         return@getChatMessageList
                     }
@@ -127,7 +131,11 @@ class ChatViewModel(
 
     fun getChatMessages() {
         viewModelScope.launch {
-            repositoryRemote.getChatMessageList { status, data, error ->
+            repositoryRemote.getChatMessageList(
+                state.currentUserName ?: "anonymous",
+                state.currentContactName ?: "anonymous",
+                ""
+            ) { status, data, error ->
                 error?.let {
                     setUiNotification(error.message)
                     pushProgressBar(false)
@@ -166,6 +174,7 @@ class ChatViewModel(
         viewModelScope.launch {
             repositoryRemote.setChatMessage(
                 state.currentUserName ?: "anonymous",
+                state.currentContactName ?: "anonymous",
                 text
             ) { status, data, error ->
                 error?.let {

@@ -113,25 +113,33 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
 
 
     suspend fun getChatMessageList(
+        nickname: String,
+        clientName: String,
+        afterId: String,
         onEvent: suspend (status: HttpStatus, data: ChatMessageResponse?, error: Exception?) -> Unit
     ) {
         val requestName = "api/messages"
         val request = Request(
             url = repositoryLocal.getBaseUrl() + "/$requestName",
-            paramHashMap = hashMapOf(),
+            paramHashMap = hashMapOf(
+                "nickname" to nickname,
+                "client_name" to clientName,
+                "after_id" to afterId
+            ),
             typeValue = RequestType.Online.name,
             methodValue = RequestMethod.Get.name
         )
         get<ChatMessageResponse>(
             request = request,
             onEvent = { status, data, error ->
-                onEvent(status,data,error)
+                onEvent(status, data, error)
             }
         )
     }
 
     suspend fun setChatMessage(
         nickname: String,
+        clientName: String,
         text: String,
         onEvent: suspend (status: HttpStatus, data: ChatMessageResponse.ChatMessage?, error: Exception?) -> Unit
     ) {
@@ -141,6 +149,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             url = repositoryLocal.getBaseUrl() + "/$requestName",
             paramHashMap = hashMapOf(
                 "nickname" to nickname,
+                "client_name" to clientName,
                 "text" to text
             ),
             typeValue = RequestType.Online.name,
@@ -149,22 +158,10 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
         postJson<ChatMessageResponse.ChatMessage?>(
             request = request,
             onEvent = { status, data, error ->
-                onEvent(status,data,error)
+                onEvent(status, data, error)
             }
         )
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     suspend fun setPhoto(
