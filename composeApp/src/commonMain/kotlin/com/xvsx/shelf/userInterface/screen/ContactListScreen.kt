@@ -225,6 +225,8 @@ class ContactListScreen() : Screen {
                                         contactListViewModel.deleteContact(contactEntity)
                                     },
                                     onClick = { contactEntity ->
+                                    },
+                                    onChat = { contactEntity ->
                                         contactEntity.nickname?.let {
                                             contactListViewModel.updateCurrentContact(it)
                                             navigator?.push(chatScreen)
@@ -308,7 +310,8 @@ class ContactListScreen() : Screen {
     fun Contact(
         contactEntity: ContactEntity,
         onDelete: (contactEntity: ContactEntity) -> Unit,
-        onClick: (contactEntity: ContactEntity) -> Unit
+        onClick: (contactEntity: ContactEntity) -> Unit,
+        onChat: (contactEntity: ContactEntity) -> Unit
     ) {
         Row(
             modifier = Modifier
@@ -318,6 +321,18 @@ class ContactListScreen() : Screen {
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(
+                onClick = {
+                    onDelete(contactEntity)
+                }
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_person_remove),
+                    contentDescription = "Delete",
+                    tint = Colors.White
+                )
+            }
+
             Text(
                 modifier = Modifier.weight(1f),
                 text = contactEntity.nickname ?: "",
@@ -327,12 +342,12 @@ class ContactListScreen() : Screen {
 
             IconButton(
                 onClick = {
-                    onDelete(contactEntity)
+                    onChat(contactEntity)
                 }
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_person_remove),
-                    contentDescription = "Delete",
+                    painter = painterResource(Res.drawable.ic_chat),
+                    contentDescription = "Chat",
                     tint = Colors.White
                 )
             }
