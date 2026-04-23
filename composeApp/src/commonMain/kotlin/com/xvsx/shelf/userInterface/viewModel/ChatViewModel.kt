@@ -98,7 +98,10 @@ class ChatViewModel(
                             data?.let { chatMessageResponse ->
                                 chatMessageResponse.mapToChatMessageEntityList()
                                     ?.let { nnRemoteChatMessageEntity ->
-                                        if (nnRemoteChatMessageEntity.isEmpty()) return@getChatMessageList
+                                        if (nnRemoteChatMessageEntity.isEmpty()){
+                                            repositoryLocal.clearChatMessageEntityList()
+                                            return@getChatMessageList
+                                        }
 
                                         repositoryLocal.getChatMessageEntityList()
                                             ?.let { nnLocalChatMessageEntity ->
