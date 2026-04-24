@@ -8,12 +8,15 @@ import androidx.lifecycle.viewModelScope
 import com.xvsx.shelf.data.local.RepositoryLocal
 import com.xvsx.shelf.data.local.dataBase.entity.ContactEntity
 import com.xvsx.shelf.data.remote.RepositoryRemote
+import com.xvsx.shelf.data.remote.http.HttpClientCore
+import com.xvsx.shelf.util.System
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ContactListViewModel(
     private val repositoryRemote: RepositoryRemote,
-    private val repositoryLocal: RepositoryLocal
+    private val repositoryLocal: RepositoryLocal,
+    private val system: System
 ) : ViewModel() {
     companion object Companion {
         const val TAG = "ChatViewModel"
@@ -123,5 +126,45 @@ class ContactListViewModel(
 
     fun updateCurrentContact(name: String) {
         repositoryLocal.setCurrentContactName(name)
+    }
+
+    fun getUserValidation(
+        nickname: String,
+        onResult: (validationStatus: Boolean)->Unit
+    ) {
+        viewModelScope.launch {
+            repositoryRemote.getUserValidation(
+                nickname,
+                system.getDeviceInfo().id,
+            ) { status, data, error ->
+                error?.let {
+                    setUiNotification(error.message)
+                    pushProgressBar(false)
+                    return@getUserValidation
+                }
+                when (status) {
+                    HttpClientCore.HttpStatus.Started -> {
+                        pushProgressBar(true)
+                    }
+
+                    HttpClientCore.HttpStatus.Completed -> {
+                        data?.let { userValidationResponse ->
+                            onResult(userValidationResponse.valid)
+                            if(userValidationResponse.valid){
+                                updateCurrentUser(nickname)
+                            }else{
+                                setUiNotification("Nickname already in use.")
+                            }
+                        }
+                        pushProgressBar(false)
+                    }
+
+                    HttpClientCore.HttpStatus.Busy -> {
+                        setUiNotification("Can't obtain messages. Ty again later")
+                        pushProgressBar(false)
+                    }
+                }
+            }
+        }
     }
 }

@@ -10,13 +10,15 @@ import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
 import com.xvsx.shelf.data.local.dataBase.entity.ContactEntity
 import com.xvsx.shelf.data.remote.RepositoryRemote
 import com.xvsx.shelf.data.remote.http.HttpClientCore
+import com.xvsx.shelf.util.System
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ChatViewModel(
     private val repositoryRemote: RepositoryRemote,
-    private val repositoryLocal: RepositoryLocal
-) : ViewModel() {
+    private val repositoryLocal: RepositoryLocal,
+    private val system: System
+    ) : ViewModel() {
     companion object Companion {
         const val TAG = "ChatViewModel"
     }
@@ -177,6 +179,7 @@ class ChatViewModel(
         viewModelScope.launch {
             repositoryRemote.setChatMessage(
                 state.currentUserName ?: "anonymous",
+                system.getDeviceInfo().id,
                 state.currentContactName ?: "anonymous",
                 text
             ) { status, data, error ->
@@ -193,6 +196,46 @@ class ChatViewModel(
                     HttpClientCore.HttpStatus.Completed -> {
                         data?.let { chatMessageResponse ->
                             onSuccess(chatMessageResponse.mapToChatMessageEntity())
+                        }
+                        pushProgressBar(false)
+                    }
+
+                    HttpClientCore.HttpStatus.Busy -> {
+                        setUiNotification("Can't obtain messages. Ty again later")
+                        pushProgressBar(false)
+                    }
+                }
+            }
+        }
+    }
+
+    fun getUserValidation(
+        nickname: String,
+        onResult: (validationStatus: Boolean)->Unit
+    ) {
+        viewModelScope.launch {
+            repositoryRemote.getUserValidation(
+                nickname,
+                system.getDeviceInfo().id,
+            ) { status, data, error ->
+                error?.let {
+                    setUiNotification(error.message)
+                    pushProgressBar(false)
+                    return@getUserValidation
+                }
+                when (status) {
+                    HttpClientCore.HttpStatus.Started -> {
+                        pushProgressBar(true)
+                    }
+
+                    HttpClientCore.HttpStatus.Completed -> {
+                        data?.let { userValidationResponse ->
+                            onResult(userValidationResponse.valid)
+                            if(userValidationResponse.valid){
+                                updateCurrentUser(nickname)
+                            }else{
+                                setUiNotification("Nickname already in use.")
+                            }
                         }
                         pushProgressBar(false)
                     }

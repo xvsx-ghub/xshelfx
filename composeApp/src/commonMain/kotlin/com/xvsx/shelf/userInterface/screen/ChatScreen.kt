@@ -46,8 +46,8 @@ import com.xvsx.shelf.userInterface.viewModel.ChatViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import shelf.composeapp.generated.resources.Res
-import shelf.composeapp.generated.resources.ic_check
 import shelf.composeapp.generated.resources.ic_contacts
+import shelf.composeapp.generated.resources.ic_person_canceled
 import shelf.composeapp.generated.resources.ic_person_check
 import shelf.composeapp.generated.resources.ic_send
 
@@ -115,6 +115,7 @@ class ChatScreen() : Screen {
                         ) {
                             var draft by remember { mutableStateOf("") }
                             var isFocused by remember { mutableStateOf(false) }
+                            var isValid by remember { mutableStateOf(true) }
 
                             LaunchedEffect(chatViewModel.state.currentUserName) {
                                 draft = chatViewModel.state.currentUserName ?: ""
@@ -125,7 +126,7 @@ class ChatScreen() : Screen {
                                     .weight(1f)
                                     .onFocusChanged { focusState ->
                                         if (isFocused && !focusState.isFocused) {
-                                            chatViewModel.updateCurrentUser(draft)
+                                            chatViewModel.getUserValidation(draft) {}
                                         }
                                         isFocused = focusState.isFocused
                                     },
@@ -144,20 +145,37 @@ class ChatScreen() : Screen {
                                 ),
                                 keyboardActions = KeyboardActions(
                                     onDone = {
-                                        chatViewModel.updateCurrentUser(draft)
+                                        chatViewModel.getUserValidation(draft) { validationStatus ->
+                                            isValid = validationStatus
+                                        }
                                         focusManager.clearFocus()
                                     }
                                 ),
                                 singleLine = true,
-                                colors = OutlinedTextFieldDefaults.colors(
+                                colors = if(isValid) {
+                                    OutlinedTextFieldDefaults.colors(
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
-                                ),
+                                    )
+                                }else{
+                                    OutlinedTextFieldDefaults.colors(
+                                        focusedTextColor = Color.Red,
+                                        unfocusedTextColor = Color.Red
+                                    )
+                                },
                                 trailingIcon = {
                                     Icon(
-                                        painter = painterResource(Res.drawable.ic_person_check),
+                                        painter = if(isValid) {
+                                            painterResource(Res.drawable.ic_person_check)
+                                        }else{
+                                            painterResource(Res.drawable.ic_person_canceled)
+                                        },
                                         contentDescription = "User",
-                                        tint = Colors.Gray
+                                        tint = if(isValid) {
+                                            Colors.Gray
+                                        }else{
+                                            Colors.Red
+                                        }
                                     )
                                 }
                             )

@@ -23,8 +23,8 @@ val baseApplicationModule = module {
     single { ContactListScreen() }
 
     single { SplashViewModel(get (), get()) }
-    single { ChatViewModel(get (), get()) }
-    single { ContactListViewModel(get(), get()) }
+    single { ChatViewModel(get (), get(), get()) }
+    single { ContactListViewModel(get(), get(),get()) }
 
     single<Settings> { Settings() }
     single { SettingsManager(get()) }

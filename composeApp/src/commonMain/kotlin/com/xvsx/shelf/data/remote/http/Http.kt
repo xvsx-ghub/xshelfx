@@ -13,6 +13,7 @@ import com.xvsx.shelf.data.remote.http.response.PendingWeighingListResponse
 import com.xvsx.shelf.data.remote.http.response.RouteResponse
 import com.xvsx.shelf.data.remote.http.response.ServerResponse
 import com.xvsx.shelf.data.remote.http.response.TruckReportListResponse
+import com.xvsx.shelf.data.remote.http.response.UserValidationResponse
 import com.xvsx.shelf.data.remote.http.response.WasteTypeListResponse
 import com.xvsx.shelf.data.remote.http.response.WeighingResponse
 import com.xvsx.shelf.data.remote.http.response.WeightResponse
@@ -139,6 +140,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
 
     suspend fun setChatMessage(
         nickname: String,
+        deviceId: String,
         clientName: String,
         text: String,
         onEvent: suspend (status: HttpStatus, data: ChatMessageResponse.ChatMessage?, error: Exception?) -> Unit
@@ -149,6 +151,7 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             url = repositoryLocal.getBaseUrl() + "/$requestName",
             paramHashMap = hashMapOf(
                 "nickname" to nickname,
+                "device_id" to deviceId,
                 "client_name" to clientName,
                 "text" to text
             ),
@@ -156,6 +159,29 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             methodValue = RequestMethod.Post.name
         )
         postJson<ChatMessageResponse.ChatMessage?>(
+            request = request,
+            onEvent = { status, data, error ->
+                onEvent(status, data, error)
+            }
+        )
+    }
+
+    suspend fun getUserValidation(
+        nickname: String,
+        deviceId: String,
+        onEvent: suspend (status: HttpStatus, data: UserValidationResponse?, error: Exception?) -> Unit
+    ) {
+        val requestName = "api/identity/validate"
+        val request = Request(
+            url = repositoryLocal.getBaseUrl() + "/$requestName",
+            paramHashMap = hashMapOf(
+                "nickname" to nickname,
+                "device_id" to deviceId,
+            ),
+            typeValue = RequestType.Online.name,
+            methodValue = RequestMethod.Get.name
+        )
+        get<UserValidationResponse>(
             request = request,
             onEvent = { status, data, error ->
                 onEvent(status, data, error)

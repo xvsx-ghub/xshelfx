@@ -18,7 +18,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,8 +48,8 @@ import org.koin.compose.koinInject
 import shelf.composeapp.generated.resources.Res
 import shelf.composeapp.generated.resources.ic_add
 import shelf.composeapp.generated.resources.ic_chat
-import shelf.composeapp.generated.resources.ic_check
 import shelf.composeapp.generated.resources.ic_person_add
+import shelf.composeapp.generated.resources.ic_person_canceled
 import shelf.composeapp.generated.resources.ic_person_check
 import shelf.composeapp.generated.resources.ic_person_remove
 import shelf.composeapp.generated.resources.ic_person_search
@@ -118,6 +117,7 @@ class ContactListScreen() : Screen {
                     ) {
                         var draft by remember { mutableStateOf("") }
                         var isFocused by remember { mutableStateOf(false) }
+                        var isValid by remember { mutableStateOf(true) }
 
                         LaunchedEffect(contactListViewModel.state.currentUserName) {
                             draft = contactListViewModel.state.currentUserName ?: ""
@@ -138,7 +138,7 @@ class ContactListScreen() : Screen {
                                 .weight(1f)
                                 .onFocusChanged { focusState ->
                                     if (isFocused && !focusState.isFocused) {
-                                        contactListViewModel.updateCurrentUser(draft)
+                                        contactListViewModel.getUserValidation(draft) {}
                                     }
                                     isFocused = focusState.isFocused
                                 },
@@ -157,20 +157,37 @@ class ContactListScreen() : Screen {
                             ),
                             keyboardActions = KeyboardActions(
                                 onDone = {
-                                    contactListViewModel.updateCurrentUser(draft)
+                                    contactListViewModel.getUserValidation(draft) { validationStatus ->
+                                        isValid = validationStatus
+                                    }
                                     focusManager.clearFocus()
                                 }
                             ),
                             singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
-                            ),
+                            colors = if(isValid) {
+                                OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White
+                                )
+                            }else{
+                                OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = Color.Red,
+                                    unfocusedTextColor = Color.Red
+                                )
+                            },
                             trailingIcon = {
                                 Icon(
-                                    painter = painterResource(Res.drawable.ic_person_check),
+                                    painter = if(isValid) {
+                                        painterResource(Res.drawable.ic_person_check)
+                                    }else{
+                                        painterResource(Res.drawable.ic_person_canceled)
+                                    },
                                     contentDescription = "User",
-                                    tint = Colors.Gray
+                                    tint = if(isValid) {
+                                        Colors.Gray
+                                    }else{
+                                        Colors.Red
+                                    }
                                 )
                             }
                         )
