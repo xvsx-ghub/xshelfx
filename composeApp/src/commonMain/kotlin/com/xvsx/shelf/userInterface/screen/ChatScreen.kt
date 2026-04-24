@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +32,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
@@ -45,6 +48,7 @@ import org.koin.compose.koinInject
 import shelf.composeapp.generated.resources.Res
 import shelf.composeapp.generated.resources.ic_check
 import shelf.composeapp.generated.resources.ic_contacts
+import shelf.composeapp.generated.resources.ic_person_check
 import shelf.composeapp.generated.resources.ic_send
 
 class ChatScreen() : Screen {
@@ -101,7 +105,7 @@ class ChatScreen() : Screen {
                 },
             topBar = {
                 Column {
-                    if(chatViewModel.state.currentUserName.isNullOrEmpty()) {
+                    if (chatViewModel.state.currentUserName.isNullOrEmpty()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -110,40 +114,53 @@ class ChatScreen() : Screen {
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             var draft by remember { mutableStateOf("") }
+                            var isFocused by remember { mutableStateOf(false) }
+
                             LaunchedEffect(chatViewModel.state.currentUserName) {
                                 draft = chatViewModel.state.currentUserName ?: ""
                             }
 
                             OutlinedTextField(
                                 modifier = Modifier
-                                    .weight(1f),
+                                    .weight(1f)
+                                    .onFocusChanged { focusState ->
+                                        if (isFocused && !focusState.isFocused) {
+                                            chatViewModel.updateCurrentUser(draft)
+                                        }
+                                        isFocused = focusState.isFocused
+                                    },
                                 value = draft,
                                 onValueChange = {
                                     draft = it
                                 },
                                 placeholder = {
                                     Text(
-                                        "Set your nickname",
+                                        "Set nickname",
                                         color = Color.Gray
                                     )
                                 },
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        chatViewModel.updateCurrentUser(draft)
+                                        focusManager.clearFocus()
+                                    }
+                                ),
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedTextColor = Color.White,
                                     unfocusedTextColor = Color.White
-                                )
-                            )
-                            IconButton(
-                                onClick = {
-                                    chatViewModel.updateCurrentUser(draft)
+                                ),
+                                trailingIcon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_person_check),
+                                        contentDescription = "User",
+                                        tint = Colors.Gray
+                                    )
                                 }
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_check),
-                                    contentDescription = "Approve nickname",
-                                    tint = Colors.White
-                                )
-                            }
+                            )
                         }
                     }
                     Row(
@@ -175,15 +192,31 @@ class ChatScreen() : Screen {
                             },
                             placeholder = {
                                 Text(
-                                    "Select contact",
+                                    "Set contact",
                                     color = Color.Gray
                                 )
                             },
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    chatViewModel.updateCurrentContact(draft)
+                                    focusManager.clearFocus()
+                                }
+                            ),
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White
-                            )
+                            ),
+                            trailingIcon = {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_person_check),
+                                    contentDescription = "User",
+                                    tint = Colors.Gray
+                                )
+                            }
                         )
                         IconButton(
                             onClick = {

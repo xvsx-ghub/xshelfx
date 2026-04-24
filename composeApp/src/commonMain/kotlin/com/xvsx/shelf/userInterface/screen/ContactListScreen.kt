@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,9 +29,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
@@ -113,6 +117,8 @@ class ContactListScreen() : Screen {
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         var draft by remember { mutableStateOf("") }
+                        var isFocused by remember { mutableStateOf(false) }
+
                         LaunchedEffect(contactListViewModel.state.currentUserName) {
                             draft = contactListViewModel.state.currentUserName ?: ""
                         }
@@ -129,17 +135,32 @@ class ContactListScreen() : Screen {
                         }
                         OutlinedTextField(
                             modifier = Modifier
-                                .weight(1f),
+                                .weight(1f)
+                                .onFocusChanged { focusState ->
+                                    if (isFocused && !focusState.isFocused) {
+                                        contactListViewModel.updateCurrentUser(draft)
+                                    }
+                                    isFocused = focusState.isFocused
+                                },
                             value = draft,
                             onValueChange = {
                                 draft = it
                             },
                             placeholder = {
                                 Text(
-                                    "Set your nickname",
+                                    "Set nickname",
                                     color = Color.Gray
                                 )
                             },
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    contactListViewModel.updateCurrentUser(draft)
+                                    focusManager.clearFocus()
+                                }
+                            ),
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
@@ -153,17 +174,6 @@ class ContactListScreen() : Screen {
                                 )
                             }
                         )
-                        IconButton(
-                            onClick = {
-                                contactListViewModel.updateCurrentUser(draft)
-                            }
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_check),
-                                contentDescription = "Approve nickname",
-                                tint = Colors.White
-                            )
-                        }
                     }
                     Row(
                         modifier = Modifier

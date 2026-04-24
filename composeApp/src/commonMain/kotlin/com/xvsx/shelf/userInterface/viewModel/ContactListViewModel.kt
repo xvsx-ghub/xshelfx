@@ -90,7 +90,15 @@ class ContactListViewModel(
         nickname: String,
         onSuccess: (contactEntityList: List<ContactEntity>) -> Unit
     ) {
-        if (nickname.isEmpty()) return
+        if (nickname.isEmpty()) {
+            viewModelScope.launch {
+                repositoryLocal.getContactEntityList()?.let{
+                    state = state.copy(contactEntityList = it)
+                    onSuccess(it)
+                }
+            }
+            return
+        }
         viewModelScope.launch {
             repositoryLocal.getContactEntityListSameByNickname(nickname)?.let{
                 state = state.copy(contactEntityList = it)
