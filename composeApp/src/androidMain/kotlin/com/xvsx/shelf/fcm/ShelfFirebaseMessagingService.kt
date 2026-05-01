@@ -1,0 +1,75 @@
+package com.xvsx.shelf.fcm
+
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
+import com.xvsx.shelf.R
+import com.xvsx.shelf.push.PushTokenRegistrar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+
+class ShelfFirebaseMessagingService : FirebaseMessagingService(), KoinComponent {
+
+    private val pushTokenRegistrar: PushTokenRegistrar by inject()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onNewToken(token: String) {
+        scope.launch {
+            pushTokenRegistrar.onNewToken(token)
+        }
+    }
+
+    override fun onMessageReceived(message: RemoteMessage) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        val title = message.notification?.title
+            ?: message.data["title"]
+            ?: getString(R.string.app_name)
+        val body = message.notification?.body
+            ?: message.data["body"]
+            ?: message.data["message"]
+            ?: return
+
+        ensureChannel()
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_logo)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+
+        NotificationManagerCompat.from(this).notify(message.messageId?.hashCode() ?: 0, notification)
+    }
+
+    private fun ensureChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = getSystemService(NotificationManager::class.java) ?: return
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            getString(R.string.fcm_notification_channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        manager.createNotificationChannel(channel)
+    }
+
+    companion object {
+        const val CHANNEL_ID = "shelf_fcm_default"
+    }
+}

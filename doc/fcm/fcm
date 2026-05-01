@@ -1,0 +1,23 @@
+Soloviov Vadim - TW7G72D5QG
+
+Name:ShelfPushNotifications
+Key ID:QRS5LVWTWT
+Services:Apple Push Notifications service (APNs)
+
+https://www.youtube.com/watch?v=TPAYEBQ1eR0
+
+Here is what was implemented and how it fits together.
+
+Android (composeApp)
+Gradle: Applied com.google.gms.google-services, added Firebase BOM + firebase-messaging via androidMainImplementation (so platform() is not used inside kotlin.sourceSets, which Kotlin 2.3 rejects).
+composeApp/google-services.json: Added using the same Firebase project as your iOS plist (shelf-a953d, API key, sender ID). The mobilesdk_app_id is a placeholder-style value (…:android:c4364877462259f4ff9322). After you add or confirm the Android app (com.xvsx.shelf) in Firebase Console → Project settings, download the real google-services.json and replace this file so FCM registration matches your registered app.
+ShelfFirebaseMessagingService: Handles foreground/data payloads, ensures notification channel shelf_fcm_default, shows a notification when there is a title/body (notification payload or title / body / message in data).
+AndroidManifest.xml: POST_NOTIFICATIONS, FCM service + MESSAGING_EVENT, default notification channel id meta-data.
+MainActivity: Requests POST_NOTIFICATIONS on Android 13+.
+iOS (iosApp)
+AppDelegate.swift: FirebaseApp.configure(), notification permission, remote notification registration, forwards APNs token to FCM (Messaging.messaging().apnsToken), presents banners while foregrounded via UNUserNotificationCenterDelegate.
+iOSApp.swift: @UIApplicationDelegateAdaptor(AppDelegate.self).
+project.pbxproj: Linked FirebaseCore alongside existing FirebaseMessaging (needed for FirebaseApp.configure()).
+./gradlew :composeApp:assembleDebug completes successfully with these changes.
+
+What you should do next: In Firebase, ensure an Android app exists for com.xvsx.shelf, then replace composeApp/google-services.json with the downloaded file. Without that, token delivery can fail even though the project builds. If you want FCM tokens sent to your backend (similar to HardwareModel on login), say how the API should receive them and we can wire that in.

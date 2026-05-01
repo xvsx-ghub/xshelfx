@@ -6,4 +6,6 @@
     <string name="please_open_the_app_to_keep_your_data_syncing_fast">Please open the app to keep your data syncing fast.</string>
     <string name="stomp_service_starting">Stomp service starting.</string>
     <string name="technical_message">Technical message.</string>
+    <string name="fcm_notification_channel_name">Messages</string>
+    <string name="fcm_default_notification_channel_id" translatable="false">shelf_fcm_default</string>
 </resources>

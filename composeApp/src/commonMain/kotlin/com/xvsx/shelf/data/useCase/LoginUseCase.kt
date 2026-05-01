@@ -3,8 +3,13 @@ package com.xvsx.shelf.data.useCase
 import com.xvsx.shelf.data.local.RepositoryLocal
 import com.xvsx.shelf.data.remote.http.Http
 import com.xvsx.shelf.data.remote.http.HttpClientCore.HttpStatus
+import com.xvsx.shelf.push.PushTokenRegistrar
 
-class LoginUseCase(val http: Http, val repositoryLocal: RepositoryLocal) {
+class LoginUseCase(
+    val http: Http,
+    val repositoryLocal: RepositoryLocal,
+    private val pushTokenRegistrar: PushTokenRegistrar,
+) {
 
     enum class Event {
         UNKNOWN,
@@ -53,6 +58,7 @@ class LoginUseCase(val http: Http, val repositoryLocal: RepositoryLocal) {
                                                                     onSuccess = {
                                                                         getNotServicingReasonList(
                                                                             onSuccess = {
+                                                                                pushTokenRegistrar.flushPendingAfterLogin()
                                                                                 onEvent(
                                                                                     Event.COMPLETED,
                                                                                     null

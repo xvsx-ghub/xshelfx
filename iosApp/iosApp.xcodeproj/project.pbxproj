@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EFF08B072FA4A2C20050AF06 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = EFF08B062FA4A2C20050AF06 /* FirebaseMessaging */; };
+		EFF08B082FA4A2C20050AF07 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = EFF08B092FA4A2C20050AF07 /* FirebaseCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		5F2BFA8BC4145A5BBD40082E /* Shelf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shelf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -41,6 +46,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EFF08B082FA4A2C20050AF07 /* FirebaseCore in Frameworks */,
+				EFF08B072FA4A2C20050AF06 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,6 +59,7 @@
 			children = (
 				E780E38E692BC06F1B75B77C /* Configuration */,
 				C871E8DA841CDF095F0DEB11 /* iosApp */,
+				EFF08B052FA4A2C20050AF06 /* Frameworks */,
 				AAD026D376634AF5E183B6A3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,6 +70,13 @@
 				5F2BFA8BC4145A5BBD40082E /* Shelf.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		EFF08B052FA4A2C20050AF06 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -85,6 +100,8 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+				EFF08B092FA4A2C20050AF07 /* FirebaseCore */,
+				EFF08B062FA4A2C20050AF06 /* FirebaseMessaging */,
 			);
 			productName = iosApp;
 			productReference = 5F2BFA8BC4145A5BBD40082E /* Shelf.app */;
@@ -114,6 +131,9 @@
 			);
 			mainGroup = 36C08476E2A4C336BBB04CA1;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EFF08B032FA4A0C10050AF06 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AAD026D376634AF5E183B6A3 /* Products */;
 			projectDirPath = "";
@@ -299,9 +319,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = TW7G72D5QG;
 				ENABLE_PREVIEWS = YES;
@@ -312,11 +333,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.xvsx.shelf;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -329,9 +351,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = TW7G72D5QG;
 				ENABLE_PREVIEWS = YES;
@@ -342,11 +365,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.xvsx.shelf;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -376,6 +400,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EFF08B032FA4A0C10050AF06 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = exactVersion;
+				version = 12.12.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EFF08B062FA4A2C20050AF06 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EFF08B032FA4A0C10050AF06 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		EFF08B092FA4A2C20050AF07 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EFF08B032FA4A0C10050AF06 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3134921F12389DEFC546A448 /* Project object */;
 }

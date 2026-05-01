@@ -93,6 +93,17 @@ class RepositoryLocal(
         return rosterId!!
     }
 
+    fun setPendingPushToken(token: String) {
+        settingsManager.pendingFcmToken = token
+    }
+
+    fun getPendingPushToken(): String? =
+        settingsManager.pendingFcmToken.takeIf { it.isNotEmpty() }
+
+    fun clearPendingPushToken() {
+        settingsManager.pendingFcmToken = ""
+    }
+
     fun getLocalGeneratedTransactionId(): Int {
         return settingsManager.transactionId
     }

@@ -8,6 +8,7 @@ import com.xvsx.shelf.data.remote.RepositoryRemote
 import com.xvsx.shelf.data.remote.http.Http
 import com.xvsx.shelf.data.remote.stomp.StompManager
 import com.xvsx.shelf.data.useCase.LoginUseCase
+import com.xvsx.shelf.push.PushTokenRegistrar
 import com.xvsx.shelf.userInterface.screen.ChatScreen
 import com.xvsx.shelf.userInterface.screen.ContactListScreen
 import com.xvsx.shelf.userInterface.screen.SplashScreen
@@ -34,7 +35,8 @@ val baseApplicationModule = module {
 
     single { System() }
 
-    single { LoginUseCase(get(), get()) }
+    single { PushTokenRegistrar(get(), get()) }
+    single { LoginUseCase(get(), get(), get()) }
 
     single { RepositoryLocal(get(), get(), get()) }
     single { RepositoryRemote(get()) }

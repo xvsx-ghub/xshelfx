@@ -15,7 +15,12 @@ class SettingsManager(
         private const val TRANSACTION_ID = "transactionId"
         private const val CURRENT_USER_NAME_KEY = "CURRENT_USER_NAME_KEY"
         private const val CURRENT_CONTACT_NAME_KEY = "CURRENT_CONTACT_NAME_KEY"
+        private const val PENDING_FCM_TOKEN_KEY = "PENDING_FCM_TOKEN_KEY"
     }
+
+    var pendingFcmToken: String
+        get() = settings.getString(PENDING_FCM_TOKEN_KEY, "")
+        set(value) = settings.set(PENDING_FCM_TOKEN_KEY, value)
 
     var baseUrl: String
         get() = settings.getString(BASE_URL_KEY, "")

@@ -15,6 +15,7 @@ import com.xvsx.shelf.data.remote.http.response.ServerResponse
 import com.xvsx.shelf.data.remote.http.response.TruckReportListResponse
 import com.xvsx.shelf.data.remote.http.response.UserValidationResponse
 import com.xvsx.shelf.data.remote.http.response.WasteTypeListResponse
+import com.xvsx.shelf.data.remote.http.HttpClientCore.UnknownData
 import com.xvsx.shelf.data.remote.http.response.WeighingResponse
 import com.xvsx.shelf.data.remote.http.response.WeightResponse
 import com.xvsx.shelf.util.Logger
@@ -667,6 +668,36 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             methodValue = RequestMethod.Post.name
         )
         postFormData<Wis<RouteResponse>>(
+            request = request,
+            onEvent = { status, data, error ->
+                handleResponse(
+                    request = request,
+                    status = status,
+                    data = data,
+                    error = error,
+                    onEvent = onEvent
+                )
+            }
+        )
+    }
+
+    suspend fun registerPushToken(
+        pushToken: String,
+        platform: String,
+        onEvent: suspend (status: HttpStatus, data: UnknownData?, error: Exception?) -> Unit
+    ) {
+        val requestName = "TruckRouter/RegisterPushToken"
+        val request = Request(
+            url = repositoryLocal.getWisUrl() + "/$requestName",
+            paramHashMap = hashMapOf(
+                "sessionKey" to repositoryLocal.getSessionKey(),
+                "pushToken" to pushToken,
+                "platform" to platform
+            ),
+            typeValue = RequestType.Online.name,
+            methodValue = RequestMethod.Post.name
+        )
+        postFormData<Wis<UnknownData?>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
