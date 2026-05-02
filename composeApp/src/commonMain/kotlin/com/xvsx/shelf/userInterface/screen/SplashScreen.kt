@@ -13,6 +13,7 @@ import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.internal.BackHandler
+import com.xvsx.shelf.push.PushTokenRegistrar
 import com.xvsx.shelf.userInterface.viewModel.SplashViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
@@ -29,10 +30,12 @@ class SplashScreen() : Screen {
     override fun Content() {
         val splashViewModel: SplashViewModel = koinInject()
         val chatScreen: ChatScreen = koinInject()
+        val pushTokenRegistrar: PushTokenRegistrar = koinInject()
         val navigator = LocalNavigator.current
 
         LaunchedEffect(Unit) {
             splashViewModel.setBaseUrl("https://compellingly-presynsacral-albertine.ngrok-free.dev/")
+            pushTokenRegistrar.flushPendingAfterLogin()
             navigator?.push(chatScreen)
         }
 

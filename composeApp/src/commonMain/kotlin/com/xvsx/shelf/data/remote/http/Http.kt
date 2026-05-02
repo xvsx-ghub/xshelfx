@@ -8,6 +8,7 @@ import com.xvsx.shelf.data.remote.http.response.ChatMessageResponse
 import com.xvsx.shelf.data.remote.http.response.CustomerListResponse
 import com.xvsx.shelf.data.remote.http.response.CustomerTaskListResponse
 import com.xvsx.shelf.data.remote.http.response.DestinationListResponse
+import com.xvsx.shelf.data.remote.http.response.FcmRegisterResponse
 import com.xvsx.shelf.data.remote.http.response.NotServicingReasonListResponse
 import com.xvsx.shelf.data.remote.http.response.PendingWeighingListResponse
 import com.xvsx.shelf.data.remote.http.response.RouteResponse
@@ -190,90 +191,6 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
         )
     }
 
-
-    suspend fun setPhoto(
-        customerId: String,
-        transactionId: String,
-        receivedDeviceId: String,
-        timeStamp: String,
-        notServicingReasonId: String,
-        imagePath: String,
-        taskIds: String,
-        onEvent: suspend (status: HttpStatus, data: UnknownData?, error: Exception?) -> Unit
-    ) {
-        val requestName = "TruckRouter/SetLift"
-        val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
-            paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-                "device_id" to repositoryLocal.getDeviceId(),
-                "version" to repositoryLocal.getAppVersion(),
-                "CustomerID" to customerId,
-                "weight_transaction_number" to transactionId,
-                "weight_device_identification" to receivedDeviceId,
-                "CreatedAt" to timeStamp,
-                "NotServicingReason" to notServicingReasonId,
-                "task_ids" to taskIds
-            ),
-            imageFileHashMap = hashMapOf("ProblemImage" to imagePath),
-            typeValue = RequestType.Mixed.name,
-            methodValue = RequestMethod.Post.name
-        )
-        postFormData<Wis<UnknownData?>>(
-            request = request,
-            onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
-
-    suspend fun setSignature(
-        customerId: String,
-        transactionId: String,
-        receivedDeviceId: String,
-        notServicingReasonId: String,
-        imagePath: String,
-        taskIds: String,
-        onEvent: suspend (status: HttpStatus, data: UnknownData?, error: Exception?) -> Unit
-    ) {
-        val requestName = "TruckRouter/SetLift"
-        val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
-            paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-                "device_id" to repositoryLocal.getDeviceId(),
-                "version" to repositoryLocal.getAppVersion(),
-                "CustomerID" to customerId,
-                "weight_transaction_number" to transactionId,
-                "weight_device_identification" to receivedDeviceId,
-                "CreatedAt" to repositoryLocal.getFormattedCurrentTimeSeconds(),
-                "NotServicingReason" to notServicingReasonId,
-                "task_ids" to taskIds
-            ),
-            imageFileHashMap = hashMapOf("SignatureImage" to imagePath),
-            typeValue = RequestType.Mixed.name,
-            methodValue = RequestMethod.Post.name
-        )
-        postFormData<Wis<UnknownData?>>(
-            request = request,
-            onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
-
     suspend fun getCustomerList(
         onEvent: suspend (status: HttpStatus, data: CustomerListResponse?, error: Exception?) -> Unit
     ) {
@@ -339,49 +256,6 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
             methodValue = RequestMethod.Get.name
         )
         get<Wis<TruckReportListResponse>>(
-            request = request,
-            onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
-
-    suspend fun setTruckReport(
-        truckNumber: String,
-        driverId: String,
-        truckReportEntityList: List<TruckReportEntity>,
-        onEvent: suspend (status: HttpStatus, data: UnknownData?, error: Exception?) -> Unit
-    ) {
-        val params = TruckReportEntity.convertTruckReportEntityListToString(truckReportEntityList)
-
-        val imageFileHashMap = hashMapOf<String, String>()
-        truckReportEntityList.forEach { truckReportEntity ->
-            truckReportEntity.photoPath?.let {
-                imageFileHashMap.put("Image[${truckReportEntity.key}]", truckReportEntity.photoPath)
-            }
-        }
-
-        val requestName = "TruckRouter/SetTruckReport"
-        val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
-            paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-                "CreatedAt" to repositoryLocal.getFormattedCurrentTimeSeconds(),
-                "truckNumber" to truckNumber,
-                "DriverId" to driverId,
-                "Params" to params,
-            ),
-            imageFileHashMap = imageFileHashMap,
-            typeValue = RequestType.Mixed.name,
-            methodValue = RequestMethod.Post.name
-        )
-        postFormData<Wis<UnknownData>>(
             request = request,
             onEvent = { status, data, error ->
                 handleResponse(
@@ -473,240 +347,72 @@ class Http(repositoryLocal: RepositoryLocal) : HttpClientCore(repositoryLocal) {
         )
     }
 
-    suspend fun setWeightIn(
-        wasteTypeId: String,
-        destinationId: String,
-        weighbridgeId: String,
-        weight: String,
-        timestamp: String,
-        driverId: String,
-        routeId: String,
-        truckId: String,
-        onEvent: suspend (status: HttpStatus, data: WeighingResponse?, error: Exception?) -> Unit
-    ) {
-        val requestName = "TruckRouter/AddWeighbridgeWeightIn"
-        val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
-            paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-                "CreatedAt" to repositoryLocal.getFormattedCurrentTimeSeconds(),
-                "RosterId" to repositoryLocal.getRosterId(),
-                "WasteTypeId" to wasteTypeId,
-                "DestinationId" to destinationId,
-                "WeighbridgeIdIn" to weighbridgeId,
-                "WeightIn" to weight,
-                "TimestampIn" to timestamp,
-                "DriverId" to driverId,
-                "RouteId" to routeId,
-                "TruckId" to truckId
-            ),
-            typeValue = RequestType.Mixed.name,
-            methodValue = RequestMethod.Post.name
-        )
-        postFormData<Wis<WeighingResponse>>(
-            request = request,
-            onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
 
-    suspend fun setWeightOut(
-        weighingId: String,
-        weighbridgeId: String,
-        timestamp: String,
-        weight: String,
-        onEvent: suspend (status: HttpStatus, data: WeighingResponse?, error: Exception?) -> Unit
-    ) {
-        val requestName = "TruckRouter/AddWeighbridgeWeightOut"
-        val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
-            paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-                "CreatedAt" to repositoryLocal.getFormattedCurrentTimeSeconds(),
-                "RosterId" to repositoryLocal.getRosterId(),
-                "WeighingId" to weighingId,
-                "WeighbridgeIdOut" to weighbridgeId,
-                "TimestampOut" to timestamp,
-                "WeightOut" to weight
-            ),
-            typeValue = RequestType.Mixed.name,
-            methodValue = RequestMethod.Post.name
-        )
-        postFormData<Wis<WeighingResponse>>(
-            request = request,
-            onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
-
-    suspend fun setWeightNet(
-        wasteTypeId: String,
-        destinationId: String,
-        weightIn: String,
-        timestampIn: String,
-        weightOut: String,
-        driverId: String,
-        routeId: String,
-        truckId: String,
-        onEvent: suspend (status: HttpStatus, data: WeighingResponse?, error: Exception?) -> Unit
-    ) {
-        val requestName = "TruckRouter/AddExternalWeighing"
-        val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
-            paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-                "CreatedAt" to repositoryLocal.getFormattedCurrentTimeSeconds(),
-                "RosterId" to repositoryLocal.getRosterId(),
-                "WasteTypeId" to wasteTypeId,
-                "DestinationId" to destinationId,
-                "WeightIn" to weightIn,
-                "TimestampIn" to timestampIn,
-                "WeightOut" to weightOut,
-                "DriverId" to driverId,
-                "RouteId" to routeId,
-                "TruckId" to truckId
-            ),
-            typeValue = RequestType.Mixed.name,
-            methodValue = RequestMethod.Post.name
-        )
-        postFormData<Wis<WeighingResponse>>(
-            request = request,
-            onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
-
-    suspend fun getWeight(
-        weighbridgeId: String,
-        onEvent: suspend (status: HttpStatus, data: WeightResponse?, error: Exception?) -> Unit
-    ) {
-        val requestName = "TruckRouter/GetWeighbridgeWeight"
-        val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
-            paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-                "WeighbridgeId" to weighbridgeId
-            ),
-            typeValue = RequestType.Mixed.name,
-            methodValue = RequestMethod.Post.name
-        )
-        postFormData<Wis<WeightResponse>>(
-            request = request,
-            onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
-
-    suspend fun getPendingWeighingList(
-        driverId: String,
-        truckId: String,
-        onEvent: suspend (status: HttpStatus, data: PendingWeighingListResponse?, error: Exception?) -> Unit
-    ) {
-        val requestName = "TruckRouter/GetPendingWeighings"
-        val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
-            paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-                "DriverId" to driverId, // user id
-                "TruckId" to truckId // truck reg number
-            ),
-            typeValue = RequestType.Mixed.name,
-            methodValue = RequestMethod.Post.name
-        )
-        postFormData<Wis<PendingWeighingListResponse>>(
-            request = request,
-            onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
-
-    suspend fun getCurrentRoute(
-        onEvent: suspend (status: HttpStatus, data: RouteResponse?, error: Exception?) -> Unit
-    ) {
-        val requestName = "TruckRouter/GetRoute"
-        val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
-            paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-            ),
-            typeValue = RequestType.Mixed.name,
-            methodValue = RequestMethod.Post.name
-        )
-        postFormData<Wis<RouteResponse>>(
-            request = request,
-            onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
 
     suspend fun registerPushToken(
         pushToken: String,
-        platform: String,
-        onEvent: suspend (status: HttpStatus, data: UnknownData?, error: Exception?) -> Unit
+        deviceId: String,
+        onEvent: suspend (status: HttpStatus, success: Boolean, error: Exception?) -> Unit
     ) {
-        val requestName = "TruckRouter/RegisterPushToken"
         val request = Request(
-            url = repositoryLocal.getWisUrl() + "/$requestName",
+            url = repositoryLocal.getBaseUrl() + "api/fcm/register",
             paramHashMap = hashMapOf(
-                "sessionKey" to repositoryLocal.getSessionKey(),
-                "pushToken" to pushToken,
-                "platform" to platform
+                "token" to pushToken,
+                "device_id" to deviceId,
             ),
             typeValue = RequestType.Online.name,
             methodValue = RequestMethod.Post.name
         )
-        postFormData<Wis<UnknownData?>>(
+        postJson<FcmRegisterResponse>(
             request = request,
             onEvent = { status, data, error ->
-                handleResponse(
-                    request = request,
-                    status = status,
-                    data = data,
-                    error = error,
-                    onEvent = onEvent
-                )
+                when (status) {
+                    HttpStatus.Completed -> {
+                        when {
+                            error != null -> onEvent(status, false, error)
+                            data?.ok == true -> onEvent(status, true, null)
+                            else -> onEvent(
+                                status,
+                                false,
+                                Exception(data?.error ?: "FCM register failed"),
+                            )
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+        )
+    }
+
+    suspend fun unregisterFcmToken(
+        token: String,
+        onEvent: suspend (status: HttpStatus, success: Boolean, error: Exception?) -> Unit
+    ) {
+        val request = Request(
+            url = repositoryLocal.getBaseUrl() + "api/fcm/unregister",
+            paramHashMap = hashMapOf("token" to token),
+            typeValue = RequestType.Online.name,
+            methodValue = RequestMethod.Post.name
+        )
+        postJson<FcmRegisterResponse>(
+            request = request,
+            onEvent = { status, data, error ->
+                when (status) {
+                    HttpStatus.Completed -> {
+                        when {
+                            error != null -> onEvent(status, false, error)
+                            data?.ok == true -> onEvent(status, true, null)
+                            else -> onEvent(
+                                status,
+                                false,
+                                Exception(data?.error ?: "FCM unregister failed"),
+                            )
+                        }
+                    }
+
+                    else -> {}
+                }
             }
         )
     }

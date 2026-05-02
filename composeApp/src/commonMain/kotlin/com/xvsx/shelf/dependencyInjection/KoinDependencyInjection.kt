@@ -35,7 +35,7 @@ val baseApplicationModule = module {
 
     single { System() }
 
-    single { PushTokenRegistrar(get(), get()) }
+    single { PushTokenRegistrar(get(), get(), get()) }
     single { LoginUseCase(get(), get(), get()) }
 
     single { RepositoryLocal(get(), get(), get()) }
