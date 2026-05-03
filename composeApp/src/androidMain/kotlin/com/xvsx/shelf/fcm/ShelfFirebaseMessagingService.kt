@@ -11,23 +11,17 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.xvsx.shelf.R
-import com.xvsx.shelf.push.PushTokenRegistrar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import com.xvsx.shelf.push.FcmPushCoordinator
+import com.xvsx.shelf.push.parseFcmDisplayMessage
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class ShelfFirebaseMessagingService : FirebaseMessagingService(), KoinComponent {
 
-    private val pushTokenRegistrar: PushTokenRegistrar by inject()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val fcmPushCoordinator: FcmPushCoordinator by inject()
 
     override fun onNewToken(token: String) {
-        scope.launch {
-            pushTokenRegistrar.onNewToken(token)
-        }
+        fcmPushCoordinator.notifyTokenReceived(token)
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -38,19 +32,18 @@ class ShelfFirebaseMessagingService : FirebaseMessagingService(), KoinComponent 
             return
         }
 
-        val title = message.notification?.title
-            ?: message.data["title"]
-            ?: getString(R.string.app_name)
-        val body = message.notification?.body
-            ?: message.data["body"]
-            ?: message.data["message"]
-            ?: return
+        val display = parseFcmDisplayMessage(
+            defaultTitle = getString(R.string.app_name),
+            notificationTitle = message.notification?.title,
+            notificationBody = message.notification?.body,
+            data = message.data,
+        ) ?: return
 
         ensureChannel()
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_logo)
-            .setContentTitle(title)
-            .setContentText(body)
+            .setContentTitle(display.title)
+            .setContentText(display.body)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .build()

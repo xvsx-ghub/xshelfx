@@ -5,15 +5,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.navigator.Navigator
-import com.xvsx.shelf.push.logCurrentFcmToken
+import com.xvsx.shelf.push.FcmKotlinTokenFetchSkipped
+import com.xvsx.shelf.push.FcmPushCoordinator
+import com.xvsx.shelf.push.fetchCurrentPushTokenForRegistration
 import com.xvsx.shelf.userInterface.screen.SplashScreen
+import com.xvsx.shelf.util.Logger
 import org.koin.compose.koinInject
 
 @Composable
 @Preview
 fun App() {
-    LaunchedEffect(Unit) {
-        logCurrentFcmToken()
+    val fcmPushCoordinator: FcmPushCoordinator = koinInject()
+    LaunchedEffect(fcmPushCoordinator) {
+        fetchCurrentPushTokenForRegistration { result ->
+            result.onSuccess { token -> fcmPushCoordinator.notifyTokenReceived(token) }
+            result.onFailure { error ->
+                if (error is FcmKotlinTokenFetchSkipped) return@onFailure
+                Logger.e("App", "fetchCurrentPushTokenForRegistration failed: ${error.message}", error)
+            }
+        }
     }
     MaterialTheme {
         val splashScreen: SplashScreen = koinInject()
