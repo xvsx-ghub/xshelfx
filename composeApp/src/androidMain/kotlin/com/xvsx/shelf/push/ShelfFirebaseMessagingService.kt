@@ -23,6 +23,8 @@ class ShelfFirebaseMessagingService : FirebaseMessagingService(), KoinComponent 
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
+        fcmPushCoordinator.notifyInboundMessage(message.toFcmInboundMessage())
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
