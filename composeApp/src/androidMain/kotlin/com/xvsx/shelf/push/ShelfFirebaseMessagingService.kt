@@ -1,4 +1,4 @@
-package com.xvsx.shelf.fcm
+package com.xvsx.shelf.push
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -11,8 +11,6 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.xvsx.shelf.R
-import com.xvsx.shelf.push.FcmPushCoordinator
-import com.xvsx.shelf.push.parseFcmDisplayMessage
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 

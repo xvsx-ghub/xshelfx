@@ -1,6 +1,5 @@
-package com.xvsx.shelf.fcm
+package com.xvsx.shelf.push
 
-import com.xvsx.shelf.push.FcmPushCoordinator
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 

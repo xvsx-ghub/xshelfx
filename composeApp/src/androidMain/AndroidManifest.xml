@@ -19,7 +19,7 @@
             android:value="@string/fcm_default_notification_channel_id" />
 
         <service
-            android:name=".fcm.ShelfFirebaseMessagingService"
+            android:name=".push.ShelfFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
