@@ -16,7 +16,12 @@ class SettingsManager(
         private const val CURRENT_USER_NAME_KEY = "CURRENT_USER_NAME_KEY"
         private const val CURRENT_CONTACT_NAME_KEY = "CURRENT_CONTACT_NAME_KEY"
         private const val PENDING_FCM_TOKEN_KEY = "PENDING_FCM_TOKEN_KEY"
+        private const val APP_ICON_BADGE_COUNT_KEY = "APP_ICON_BADGE_COUNT_KEY"
     }
+
+    var appIconBadgeCount: Int
+        get() = settings.getInt(APP_ICON_BADGE_COUNT_KEY, 0)
+        set(value) = settings.set(APP_ICON_BADGE_COUNT_KEY, value.coerceAtLeast(0))
 
     var pendingFcmToken: String
         get() = settings.getString(PENDING_FCM_TOKEN_KEY, "")

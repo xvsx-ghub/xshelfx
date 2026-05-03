@@ -41,6 +41,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.internal.BackHandler
 import com.wiswm.nav.support.resources.Colors
 import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
+import com.xvsx.shelf.push.AppBadgeService
 import com.xvsx.shelf.userInterface.element.MulticolorProgressBar
 import com.xvsx.shelf.userInterface.viewModel.ChatViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -60,9 +61,11 @@ class ChatScreen() : Screen {
     @Composable
     override fun Content() {
         val chatViewModel: ChatViewModel = koinInject()
+        val appBadgeService: AppBadgeService = koinInject()
 
         LaunchedEffect(Unit) {
             chatViewModel.refreshState()
+            appBadgeService.clearAppIconBadgeForMessagesRead()
         }
 
         BackHandler(enabled = true) {}

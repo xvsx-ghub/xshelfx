@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 
 class FcmPushCoordinator(
     private val pushTokenRegistrar: PushTokenRegistrar,
+    private val appBadgeService: AppBadgeService,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -32,6 +33,7 @@ class FcmPushCoordinator(
                     "Title: ${message.notificationTitle}" +
                     " Body: ${message.notificationBody}")
             _inboundMessages.emit(message)
+            appBadgeService.recordInboundPushForLauncherBadge(message)
         }
     }
 
