@@ -18,7 +18,7 @@ class ChatViewModel(
     private val repositoryRemote: RepositoryRemote,
     private val repositoryLocal: RepositoryLocal,
     private val system: System
-    ) : ViewModel() {
+) : ViewModel() {
     companion object Companion {
         const val TAG = "ChatViewModel"
     }
@@ -115,22 +115,9 @@ class ChatViewModel(
                                         return@getChatMessageList
                                     }
 
-                                    repositoryLocal.getChatMessageEntityList()
-                                        ?.let { nnLocalChatMessageEntity ->
-                                            if (nnLocalChatMessageEntity.isEmpty()) {
-                                                repositoryLocal.clearChatMessageEntityList()
-                                                repositoryLocal.insertChatMessageEntityList(
-                                                    nnRemoteChatMessageEntity
-                                                )
-                                            } else {
-                                                if (nnLocalChatMessageEntity.last().createdAt != nnRemoteChatMessageEntity.last().createdAt) {
-                                                    repositoryLocal.clearChatMessageEntityList()
-                                                    repositoryLocal.insertChatMessageEntityList(
-                                                        nnRemoteChatMessageEntity
-                                                    )
-                                                }
-                                            }
-                                        }
+                                    repositoryLocal.insertChatMessageEntityList(
+                                        nnRemoteChatMessageEntity
+                                    )
                                 }
                         }
                     }
@@ -180,7 +167,7 @@ class ChatViewModel(
 
     fun getUserValidation(
         nickname: String,
-        onResult: (validationStatus: Boolean)->Unit
+        onResult: (validationStatus: Boolean) -> Unit
     ) {
         viewModelScope.launch {
             repositoryRemote.getUserValidation(
@@ -200,9 +187,9 @@ class ChatViewModel(
                     HttpClientCore.HttpStatus.Completed -> {
                         data?.let { userValidationResponse ->
                             onResult(userValidationResponse.valid)
-                            if(userValidationResponse.valid){
+                            if (userValidationResponse.valid) {
                                 updateCurrentUser(nickname)
-                            }else{
+                            } else {
                                 setUiNotification("Nickname already in use.")
                             }
                         }

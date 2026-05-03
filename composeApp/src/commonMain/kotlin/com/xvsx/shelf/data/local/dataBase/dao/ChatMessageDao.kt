@@ -30,6 +30,8 @@ interface ChatMessageDao {
     @Query("SELECT * FROM ChatMessageEntity " +
             "WHERE nickname = :nickname " +
             "AND contactName = :contactName " +
+            "OR nickname = :contactName " +
+            "AND contactName = :nickname " +
             "ORDER BY id DESC LIMIT 1")
     suspend fun getLastMessage(
         nickname: String,
