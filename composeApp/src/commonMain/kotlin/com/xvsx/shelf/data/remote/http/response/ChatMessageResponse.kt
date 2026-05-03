@@ -15,6 +15,8 @@ data class ChatMessageResponse(
         val kind: String? = null,
         val mime_type: String? = null,
         val nickname: String? = null,
+        val device_id: String? = null,
+        val client_name: String? = null,
         val original_name: String? = null,
         val text: String? = null
     ){
@@ -25,6 +27,8 @@ data class ChatMessageResponse(
             kind = kind,
             mimeType = mime_type,
             nickname = nickname,
+            deviceId = device_id,
+            contactName = client_name,
             originalName = original_name,
             text = text
         )

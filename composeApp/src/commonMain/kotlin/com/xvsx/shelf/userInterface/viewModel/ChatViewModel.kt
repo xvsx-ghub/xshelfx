@@ -87,48 +87,7 @@ class ChatViewModel(
     private fun serveChatMessagesRemote() {
         viewModelScope.launch {
             while (true) {
-                repositoryRemote.getChatMessageList(
-                    state.currentUserName ?: "anonymous",
-                    state.currentContactName ?: "anonymous",
-                    ""
-                ) { status, data, error ->
-                    error?.let {
-                        return@getChatMessageList
-                    }
-                    when (status) {
-                        HttpClientCore.HttpStatus.Completed -> {
-                            data?.let { chatMessageResponse ->
-                                chatMessageResponse.mapToChatMessageEntityList()
-                                    ?.let { nnRemoteChatMessageEntity ->
-                                        if (nnRemoteChatMessageEntity.isEmpty()){
-                                            repositoryLocal.clearChatMessageEntityList()
-                                            return@getChatMessageList
-                                        }
-
-                                        repositoryLocal.getChatMessageEntityList()
-                                            ?.let { nnLocalChatMessageEntity ->
-                                                if (nnLocalChatMessageEntity.isEmpty()) {
-                                                    repositoryLocal.clearChatMessageEntityList()
-                                                    repositoryLocal.insertChatMessageEntityList(
-                                                        nnRemoteChatMessageEntity
-                                                    )
-                                                } else {
-                                                    if (nnLocalChatMessageEntity.last().createdAt != nnRemoteChatMessageEntity.last().createdAt) {
-                                                        repositoryLocal.clearChatMessageEntityList()
-                                                        repositoryLocal.insertChatMessageEntityList(
-                                                            nnRemoteChatMessageEntity
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                    }
-                            }
-                        }
-
-                        else -> {}
-                    }
-                }
-
+                getChatMessages()
                 delay(1000)
             }
         }
@@ -139,34 +98,44 @@ class ChatViewModel(
             repositoryRemote.getChatMessageList(
                 state.currentUserName ?: "anonymous",
                 state.currentContactName ?: "anonymous",
-                ""
+                repositoryLocal.getChatMessageEntityLastMessage(
+                    state.currentUserName ?: "anonymous",
+                    state.currentContactName ?: "anonymous"
+                )?.remoteId.toString()
             ) { status, data, error ->
                 error?.let {
-                    setUiNotification(error.message)
-                    pushProgressBar(false)
                     return@getChatMessageList
                 }
                 when (status) {
-                    HttpClientCore.HttpStatus.Started -> {
-                        pushProgressBar(true)
-                    }
-
                     HttpClientCore.HttpStatus.Completed -> {
                         data?.let { chatMessageResponse ->
-                            chatMessageResponse.mapToChatMessageEntityList()?.let {
-                                repositoryLocal.clearChatMessageEntityList()
-                                repositoryLocal.insertChatMessageEntityList(
-                                    it
-                                )
-                            }
+                            chatMessageResponse.mapToChatMessageEntityList()
+                                ?.let { nnRemoteChatMessageEntity ->
+                                    if (nnRemoteChatMessageEntity.isEmpty()) {
+                                        return@getChatMessageList
+                                    }
+
+                                    repositoryLocal.getChatMessageEntityList()
+                                        ?.let { nnLocalChatMessageEntity ->
+                                            if (nnLocalChatMessageEntity.isEmpty()) {
+                                                repositoryLocal.clearChatMessageEntityList()
+                                                repositoryLocal.insertChatMessageEntityList(
+                                                    nnRemoteChatMessageEntity
+                                                )
+                                            } else {
+                                                if (nnLocalChatMessageEntity.last().createdAt != nnRemoteChatMessageEntity.last().createdAt) {
+                                                    repositoryLocal.clearChatMessageEntityList()
+                                                    repositoryLocal.insertChatMessageEntityList(
+                                                        nnRemoteChatMessageEntity
+                                                    )
+                                                }
+                                            }
+                                        }
+                                }
                         }
-                        pushProgressBar(false)
                     }
 
-                    HttpClientCore.HttpStatus.Busy -> {
-                        setUiNotification("Can't obtain messages. Ty again later")
-                        pushProgressBar(false)
-                    }
+                    else -> {}
                 }
             }
         }

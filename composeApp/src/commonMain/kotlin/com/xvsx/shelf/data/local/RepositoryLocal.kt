@@ -456,6 +456,13 @@ class RepositoryLocal(
         return appDatabase.getChatMessageDao().getList()
     }
 
+    suspend fun getChatMessageEntityLastMessage(
+        nickname: String,
+        contactName: String
+    ): ChatMessageEntity?{
+        return appDatabase.getChatMessageDao().getLastMessage(nickname, contactName)
+    }
+
     fun getChatMessageEntityListAsFlow(): Flow<List<ChatMessageEntity>?> {
         return appDatabase.getChatMessageDao().getListAsFlow()
     }

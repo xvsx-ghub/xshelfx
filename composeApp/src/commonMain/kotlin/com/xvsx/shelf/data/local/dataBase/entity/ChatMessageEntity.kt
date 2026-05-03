@@ -15,8 +15,8 @@ data class ChatMessageEntity(
     val kind: String? = null,
     val mimeType: String? = null,
     val nickname: String? = null,
-    //val contactName: String? = null,
-    //val deviceId: String? = null,
+    val contactName: String? = null,
+    val deviceId: String? = null,
     val originalName: String? = null,
     val text: String? = null
 ) {

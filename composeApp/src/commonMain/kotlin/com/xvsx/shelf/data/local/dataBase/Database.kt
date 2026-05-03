@@ -50,7 +50,7 @@ import com.xvsx.shelf.data.local.dataBase.entity.WasteTypeEntity
         UserEntity::class,
         ContactEntity::class
     ],
-    version = 39
+    version = 40
 )
 
 @ConstructedBy(AppDatabaseConstructor::class)

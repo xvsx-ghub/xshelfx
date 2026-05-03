@@ -4,6 +4,7 @@ import com.xvsx.shelf.data.remote.http.Http
 import com.xvsx.shelf.data.remote.http.HttpClientCore.HttpStatus
 import com.xvsx.shelf.data.remote.http.response.ChatMessageResponse
 import com.xvsx.shelf.data.remote.http.response.UserValidationResponse
+import com.xvsx.shelf.util.Logger
 
 class RepositoryRemote(
     private val http: Http
@@ -18,6 +19,11 @@ class RepositoryRemote(
         afterId: String,
         onEvent: suspend (status: HttpStatus, data: ChatMessageResponse?, error: Exception?) -> Unit
     ) {
+        Logger.d(
+            TAG,
+            "getChatMessageList() nickname = $nickname," +
+                    " clientName = $clientName," +
+                    " afterId = $afterId")
         http.getChatMessageList(nickname, clientName, afterId, onEvent)
     }
 

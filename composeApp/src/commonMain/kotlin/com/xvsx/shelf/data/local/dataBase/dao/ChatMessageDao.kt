@@ -26,4 +26,13 @@ interface ChatMessageDao {
 
     @Query("SELECT * FROM ChatMessageEntity")
     suspend fun getList(): List<ChatMessageEntity>?
+
+    @Query("SELECT * FROM ChatMessageEntity " +
+            "WHERE nickname = :nickname " +
+            "AND contactName = :contactName " +
+            "ORDER BY id DESC LIMIT 1")
+    suspend fun getLastMessage(
+        nickname: String,
+        contactName: String
+    ): ChatMessageEntity?
 }
