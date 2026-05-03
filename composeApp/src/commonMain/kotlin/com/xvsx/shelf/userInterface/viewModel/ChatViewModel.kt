@@ -10,6 +10,7 @@ import com.xvsx.shelf.data.local.dataBase.entity.ChatMessageEntity
 import com.xvsx.shelf.data.local.dataBase.entity.ContactEntity
 import com.xvsx.shelf.data.remote.RepositoryRemote
 import com.xvsx.shelf.data.remote.http.HttpClientCore
+import com.xvsx.shelf.push.FcmPushCoordinator
 import com.xvsx.shelf.util.System
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 class ChatViewModel(
     private val repositoryRemote: RepositoryRemote,
     private val repositoryLocal: RepositoryLocal,
-    private val system: System
+    private val system: System,
+    private val fcmPushCoordinator: FcmPushCoordinator
 ) : ViewModel() {
     companion object Companion {
         const val TAG = "ChatViewModel"
@@ -86,9 +88,8 @@ class ChatViewModel(
 
     private fun serveChatMessagesRemote() {
         viewModelScope.launch {
-            while (true) {
+            fcmPushCoordinator.inboundMessages.collect { message ->
                 getChatMessages()
-                delay(1000)
             }
         }
     }
@@ -152,6 +153,7 @@ class ChatViewModel(
                     HttpClientCore.HttpStatus.Completed -> {
                         data?.let { chatMessageResponse ->
                             onSuccess(chatMessageResponse.mapToChatMessageEntity())
+                            getChatMessages()
                         }
                         pushProgressBar(false)
                     }
