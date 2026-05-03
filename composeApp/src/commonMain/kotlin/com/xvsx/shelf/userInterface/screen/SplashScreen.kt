@@ -34,7 +34,7 @@ class SplashScreen() : Screen {
         val navigator = LocalNavigator.current
 
         LaunchedEffect(Unit) {
-            splashViewModel.setBaseUrl("https://compellingly-presynsacral-albertine.ngrok-free.dev/")
+            splashViewModel.setBaseUrl("https://retreat-proofs-tumbling.ngrok-free.dev/")
             pushTokenRegistrar.flushPendingAfterLogin()
             navigator?.push(chatScreen)
         }
